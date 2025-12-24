@@ -1,36 +1,23 @@
-# Dependencies
-node_modules/
+node_modules
 
-# Build output
-dist/
-build/
-.svelte-kit/
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
 
-# Environment variables
-.env
-.env.*
-!.env.example
-
-# Supabase
-supabase/.branches
-supabase/.temp
-
-# IDE
-.vscode/*
-!.vscode/extensions.json
-.idea/
-
-# OS files
+# OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-npm-debug.log*
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
 
-# Local development
-.local/
-
-# Cloudflare
-.wrangler/
-.dev.vars
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
