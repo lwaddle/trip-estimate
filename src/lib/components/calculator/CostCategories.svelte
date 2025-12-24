@@ -78,7 +78,7 @@
 				Total fuel burn: {$totalFuelBurn.toLocaleString()} gallons
 			</p>
 		</div>
-		<div class="grid gap-4 sm:grid-cols-3">
+		<div class="grid gap-4 sm:grid-cols-2">
 			<Input
 				type="number"
 				label="Price per Gallon"
@@ -87,15 +87,7 @@
 				value={$calculator.estimate.costs.fuel.pricePerGallon.toString()}
 				oninput={(e) => handleFuelChange('pricePerGallon', e.currentTarget.value)}
 			/>
-			<Input
-				type="number"
-				label="APU Burn (gal/hr)"
-				min="0"
-				step="5"
-				value={$calculator.estimate.costs.fuel.apuBurnPerHour.toString()}
-				oninput={(e) => handleFuelChange('apuBurnPerHour', e.currentTarget.value)}
-			/>
-			<div class="flex items-end pb-2">
+			<div class="flex items-end gap-4 pb-2">
 				<label class="flex cursor-pointer items-center gap-2">
 					<input
 						type="checkbox"
@@ -107,6 +99,18 @@
 				</label>
 			</div>
 		</div>
+		{#if $calculator.estimate.costs.fuel.includeApuBurn}
+			<div class="mt-4">
+				<Input
+					type="number"
+					label="APU Burn (lbs/leg)"
+					min="0"
+					step="10"
+					value={$calculator.estimate.costs.fuel.apuBurnPerLeg.toString()}
+					oninput={(e) => handleFuelChange('apuBurnPerLeg', e.currentTarget.value)}
+				/>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Airport & Ground -->

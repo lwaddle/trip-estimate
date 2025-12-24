@@ -18,7 +18,7 @@ function calculateCosts(data: EstimateData): CostBreakdown {
 		(sum, leg) => sum + leg.flightTimeHours + leg.flightTimeMinutes / 60,
 		0
 	);
-	const totalFuelBurn = legs.reduce((sum, leg) => sum + leg.fuelBurn, 0);
+	const totalFuelBurn = legs.reduce((sum, leg) => sum + leg.fuelBurnLbs, 0) / 6.7;
 	const crewCount = crew.length;
 	const totalDailyRates = crew.reduce((sum, m) => sum + m.dailyRate, 0);
 
@@ -143,7 +143,7 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	data.legs.forEach((leg, i) => {
 		const route = `${leg.origin || '???'} → ${leg.destination || '???'}`;
 		const time = formatHours(leg.flightTimeHours + leg.flightTimeMinutes / 60);
-		const fuel = `${leg.fuelBurn.toLocaleString()} gal`;
+		const fuel = `${leg.fuelBurnLbs.toLocaleString()} lbs`;
 
 		doc.text(`Leg ${i + 1}: ${route}`, margin, y);
 		doc.text(`${time} • ${fuel}`, pageWidth - margin - 40, y);

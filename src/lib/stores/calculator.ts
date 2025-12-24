@@ -5,6 +5,8 @@ function generateId(): string {
 	return crypto.randomUUID();
 }
 
+const FUEL_DENSITY_LBS_PER_GAL = 6.7;
+
 function createDefaultLeg(): FlightLeg {
 	return {
 		id: generateId(),
@@ -12,7 +14,7 @@ function createDefaultLeg(): FlightLeg {
 		destination: '',
 		flightTimeHours: 0,
 		flightTimeMinutes: 0,
-		fuelBurn: 0
+		fuelBurnLbs: 0
 	};
 }
 
@@ -44,7 +46,7 @@ function createDefaultCosts(): CostCategory {
 		fuel: {
 			pricePerGallon: 5.5,
 			includeApuBurn: false,
-			apuBurnPerHour: 50
+			apuBurnPerLeg: 0
 		},
 		airport: {
 			landingFees: 0,
@@ -261,7 +263,8 @@ function createCalculatorStore() {
 			hotelRate?: number;
 			mealsRate?: number;
 			maintenanceRate?: number;
-			apuBurn?: number;
+			apuBurnPerLeg?: number;
+			includeApuBurn?: boolean;
 			fuelPrice?: number;
 		}) => {
 			update((state) => ({
@@ -283,7 +286,8 @@ function createCalculatorStore() {
 						fuel: {
 							...state.estimate.costs.fuel,
 							pricePerGallon: defaults.fuelPrice ?? state.estimate.costs.fuel.pricePerGallon,
-							apuBurnPerHour: defaults.apuBurn ?? state.estimate.costs.fuel.apuBurnPerHour
+							apuBurnPerLeg: defaults.apuBurnPerLeg ?? state.estimate.costs.fuel.apuBurnPerLeg,
+							includeApuBurn: defaults.includeApuBurn ?? state.estimate.costs.fuel.includeApuBurn
 						}
 					},
 					crew: state.estimate.crew.map((member) => ({
@@ -310,7 +314,8 @@ export const totalFlightTime = derived(calculator, ($calc) => {
 });
 
 export const totalFuelBurn = derived(calculator, ($calc) => {
-	return $calc.estimate.legs.reduce((total, leg) => total + leg.fuelBurn, 0);
+	const totalLbs = $calc.estimate.legs.reduce((total, leg) => total + leg.fuelBurnLbs, 0);
+	return totalLbs / FUEL_DENSITY_LBS_PER_GAL;
 });
 
 export const crewCount = derived(calculator, ($calc) => ({
@@ -330,7 +335,7 @@ export const costBreakdown = derived(
 			totalDailyRates * costs.crew.numberOfDays +
 			costs.crew.hotelPerNight * costs.crew.numberOfNights * $crewCount.total +
 			costs.crew.mealsPerDay * costs.crew.numberOfDays * $crewCount.total +
-			costs.crew.perPersonExpenses * $crewCount.total +
+			costs.crew.perPersonExpenses * costs.crew.numberOfDays * $crewCount.total +
 			costs.crew.rentalCar +
 			costs.crew.airfare +
 			costs.crew.mileage;
@@ -343,7 +348,9 @@ export const costBreakdown = derived(
 		// Fuel costs
 		let fuelGallons = $fuelBurn;
 		if (costs.fuel.includeApuBurn) {
-			fuelGallons += costs.fuel.apuBurnPerHour * $flightTime;
+			const legCount = $calc.estimate.legs.length;
+			const apuGallons = (costs.fuel.apuBurnPerLeg / FUEL_DENSITY_LBS_PER_GAL) * legCount;
+			fuelGallons += apuGallons;
 		}
 		const fuelCost = fuelGallons * costs.fuel.pricePerGallon;
 

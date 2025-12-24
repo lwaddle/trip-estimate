@@ -84,11 +84,11 @@
 					</div>
 					<Input
 						type="number"
-						label="Fuel Burn (gal)"
+						label="Fuel Burn (lbs)"
 						min="0"
 						step="1"
-						value={leg.fuelBurn.toString()}
-						oninput={(e) => handleInputChange(leg.id, 'fuelBurn', e.currentTarget.value)}
+						value={leg.fuelBurnLbs.toString()}
+						oninput={(e) => handleInputChange(leg.id, 'fuelBurnLbs', e.currentTarget.value)}
 					/>
 				</div>
 			</div>
