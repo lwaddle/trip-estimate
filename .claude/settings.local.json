@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx sv create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx svelte-add@latest tailwindcss --no-interaction)",
+      "Bash(npx sv add:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}
