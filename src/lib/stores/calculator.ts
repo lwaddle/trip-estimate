@@ -333,7 +333,7 @@ export const costBreakdown = derived(
 			totalDailyRates * costs.crew.numberOfDays +
 			costs.crew.hotelPerNight * costs.crew.numberOfNights * $crewCount.total +
 			costs.crew.mealsPerDay * costs.crew.numberOfDays * $crewCount.total +
-			costs.crew.perPersonExpenses * $crewCount.total +
+			costs.crew.perPersonExpenses * costs.crew.numberOfDays * $crewCount.total +
 			costs.crew.rentalCar +
 			costs.crew.airfare +
 			costs.crew.mileage;

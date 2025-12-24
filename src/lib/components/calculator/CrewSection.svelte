@@ -89,77 +89,91 @@
 
 	<!-- Crew Expenses -->
 	<div class="border-t border-gray-200 pt-4">
-		<h3 class="mb-3 text-sm font-medium text-gray-700">Crew Expenses</h3>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			<div class="flex items-center gap-2">
+		<h3 class="mb-4 text-base font-semibold text-gray-900">Crew Expenses</h3>
+
+		<!-- Trip Duration -->
+		<div class="mb-6">
+			<h4 class="mb-3 text-sm font-medium text-gray-700">Trip Duration</h4>
+			<div class="grid gap-4 sm:grid-cols-2">
 				<Input
 					type="number"
-					label="Hotel/Night"
+					label="Trip Days"
+					min="0"
+					step="1"
+					value={$calculator.estimate.costs.crew.numberOfDays.toString()}
+					oninput={(e) => handleCostChange('crew', 'numberOfDays', e.currentTarget.value)}
+				/>
+				<Input
+					type="number"
+					label="Hotel Stays (nights)"
+					min="0"
+					step="1"
+					value={$calculator.estimate.costs.crew.numberOfNights.toString()}
+					oninput={(e) => handleCostChange('crew', 'numberOfNights', e.currentTarget.value)}
+				/>
+			</div>
+		</div>
+
+		<!-- Per Person Expenses -->
+		<div class="mb-6">
+			<h4 class="mb-3 text-sm font-medium text-gray-700">Per Person Expenses</h4>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<Input
+					type="number"
+					label="Hotel ($/night/person)"
 					min="0"
 					step="25"
 					value={$calculator.estimate.costs.crew.hotelPerNight.toString()}
 					oninput={(e) => handleCostChange('crew', 'hotelPerNight', e.currentTarget.value)}
 				/>
+				<Input
+					type="number"
+					label="Meals ($/day/person)"
+					min="0"
+					step="10"
+					value={$calculator.estimate.costs.crew.mealsPerDay.toString()}
+					oninput={(e) => handleCostChange('crew', 'mealsPerDay', e.currentTarget.value)}
+				/>
+				<Input
+					type="number"
+					label="Other ($/day/person)"
+					min="0"
+					step="25"
+					value={$calculator.estimate.costs.crew.perPersonExpenses.toString()}
+					oninput={(e) => handleCostChange('crew', 'perPersonExpenses', e.currentTarget.value)}
+				/>
 			</div>
-			<Input
-				type="number"
-				label="# Nights"
-				min="0"
-				step="1"
-				value={$calculator.estimate.costs.crew.numberOfNights.toString()}
-				oninput={(e) => handleCostChange('crew', 'numberOfNights', e.currentTarget.value)}
-			/>
-			<Input
-				type="number"
-				label="Meals/Day"
-				min="0"
-				step="10"
-				value={$calculator.estimate.costs.crew.mealsPerDay.toString()}
-				oninput={(e) => handleCostChange('crew', 'mealsPerDay', e.currentTarget.value)}
-			/>
-			<Input
-				type="number"
-				label="# Days"
-				min="0"
-				step="1"
-				value={$calculator.estimate.costs.crew.numberOfDays.toString()}
-				oninput={(e) => handleCostChange('crew', 'numberOfDays', e.currentTarget.value)}
-			/>
 		</div>
 
-		<div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			<Input
-				type="number"
-				label="Per Person Expenses"
-				min="0"
-				step="25"
-				value={$calculator.estimate.costs.crew.perPersonExpenses.toString()}
-				oninput={(e) => handleCostChange('crew', 'perPersonExpenses', e.currentTarget.value)}
-			/>
-			<Input
-				type="number"
-				label="Rental Car"
-				min="0"
-				step="25"
-				value={$calculator.estimate.costs.crew.rentalCar.toString()}
-				oninput={(e) => handleCostChange('crew', 'rentalCar', e.currentTarget.value)}
-			/>
-			<Input
-				type="number"
-				label="Airfare"
-				min="0"
-				step="50"
-				value={$calculator.estimate.costs.crew.airfare.toString()}
-				oninput={(e) => handleCostChange('crew', 'airfare', e.currentTarget.value)}
-			/>
-			<Input
-				type="number"
-				label="Mileage"
-				min="0"
-				step="10"
-				value={$calculator.estimate.costs.crew.mileage.toString()}
-				oninput={(e) => handleCostChange('crew', 'mileage', e.currentTarget.value)}
-			/>
+		<!-- Flat Rate Expenses -->
+		<div>
+			<h4 class="mb-3 text-sm font-medium text-gray-700">Flat Rate Expenses</h4>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<Input
+					type="number"
+					label="Rental Car ($)"
+					min="0"
+					step="25"
+					value={$calculator.estimate.costs.crew.rentalCar.toString()}
+					oninput={(e) => handleCostChange('crew', 'rentalCar', e.currentTarget.value)}
+				/>
+				<Input
+					type="number"
+					label="Airfare ($)"
+					min="0"
+					step="50"
+					value={$calculator.estimate.costs.crew.airfare.toString()}
+					oninput={(e) => handleCostChange('crew', 'airfare', e.currentTarget.value)}
+				/>
+				<Input
+					type="number"
+					label="Mileage ($)"
+					min="0"
+					step="10"
+					value={$calculator.estimate.costs.crew.mileage.toString()}
+					oninput={(e) => handleCostChange('crew', 'mileage', e.currentTarget.value)}
+				/>
+			</div>
 		</div>
 	</div>
 </div>
