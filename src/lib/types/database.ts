@@ -76,7 +76,7 @@ export interface FlightLeg {
 	destination: string;
 	flightTimeHours: number;
 	flightTimeMinutes: number;
-	fuelBurn: number;
+	fuelBurnLbs: number;
 }
 
 export interface CrewMember {

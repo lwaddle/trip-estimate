@@ -5,6 +5,8 @@ function generateId(): string {
 	return crypto.randomUUID();
 }
 
+const FUEL_DENSITY_LBS_PER_GAL = 6.7;
+
 function createDefaultLeg(): FlightLeg {
 	return {
 		id: generateId(),
@@ -12,7 +14,7 @@ function createDefaultLeg(): FlightLeg {
 		destination: '',
 		flightTimeHours: 0,
 		flightTimeMinutes: 0,
-		fuelBurn: 0
+		fuelBurnLbs: 0
 	};
 }
 
@@ -310,7 +312,8 @@ export const totalFlightTime = derived(calculator, ($calc) => {
 });
 
 export const totalFuelBurn = derived(calculator, ($calc) => {
-	return $calc.estimate.legs.reduce((total, leg) => total + leg.fuelBurn, 0);
+	const totalLbs = $calc.estimate.legs.reduce((total, leg) => total + leg.fuelBurnLbs, 0);
+	return totalLbs / FUEL_DENSITY_LBS_PER_GAL;
 });
 
 export const crewCount = derived(calculator, ($calc) => ({
