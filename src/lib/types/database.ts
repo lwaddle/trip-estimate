@@ -104,7 +104,7 @@ export interface CostCategory {
 	fuel: {
 		pricePerGallon: number;
 		includeApuBurn: boolean;
-		apuBurnPerHour: number;
+		apuBurnPerLeg: number;
 	};
 	airport: {
 		landingFees: number;
@@ -143,7 +143,8 @@ export interface AircraftProfile {
 		hotelRate: number;
 		mealsRate: number;
 		maintenanceRate: number;
-		apuBurn: number;
+		apuBurnPerLeg: number;
+		includeApuBurn: boolean;
 		fuelPrice: number;
 	};
 	isCustom: boolean;

@@ -15,7 +15,8 @@ const PRESET_PROFILES: AircraftProfile[] = [
 			hotelRate: 250,
 			mealsRate: 100,
 			maintenanceRate: 250,
-			apuBurn: 80,
+			apuBurnPerLeg: 150,
+			includeApuBurn: false,
 			fuelPrice: 5.5
 		},
 		isCustom: false,
@@ -33,7 +34,8 @@ const PRESET_PROFILES: AircraftProfile[] = [
 			hotelRate: 225,
 			mealsRate: 85,
 			maintenanceRate: 200,
-			apuBurn: 60,
+			apuBurnPerLeg: 120,
+			includeApuBurn: false,
 			fuelPrice: 5.5
 		},
 		isCustom: false,
@@ -51,7 +53,8 @@ const PRESET_PROFILES: AircraftProfile[] = [
 			hotelRate: 200,
 			mealsRate: 75,
 			maintenanceRate: 150,
-			apuBurn: 50,
+			apuBurnPerLeg: 100,
+			includeApuBurn: false,
 			fuelPrice: 5.5
 		},
 		isCustom: false,
@@ -69,7 +72,8 @@ const PRESET_PROFILES: AircraftProfile[] = [
 			hotelRate: 175,
 			mealsRate: 65,
 			maintenanceRate: 100,
-			apuBurn: 30,
+			apuBurnPerLeg: 60,
+			includeApuBurn: false,
 			fuelPrice: 5.5
 		},
 		isCustom: false,
@@ -87,7 +91,8 @@ const PRESET_PROFILES: AircraftProfile[] = [
 			hotelRate: 150,
 			mealsRate: 55,
 			maintenanceRate: 75,
-			apuBurn: 0,
+			apuBurnPerLeg: 0,
+			includeApuBurn: false,
 			fuelPrice: 5.5
 		},
 		isCustom: false,

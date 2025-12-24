@@ -46,7 +46,7 @@ function createDefaultCosts(): CostCategory {
 		fuel: {
 			pricePerGallon: 5.5,
 			includeApuBurn: false,
-			apuBurnPerHour: 50
+			apuBurnPerLeg: 0
 		},
 		airport: {
 			landingFees: 0,
@@ -263,7 +263,8 @@ function createCalculatorStore() {
 			hotelRate?: number;
 			mealsRate?: number;
 			maintenanceRate?: number;
-			apuBurn?: number;
+			apuBurnPerLeg?: number;
+			includeApuBurn?: boolean;
 			fuelPrice?: number;
 		}) => {
 			update((state) => ({
@@ -285,7 +286,8 @@ function createCalculatorStore() {
 						fuel: {
 							...state.estimate.costs.fuel,
 							pricePerGallon: defaults.fuelPrice ?? state.estimate.costs.fuel.pricePerGallon,
-							apuBurnPerHour: defaults.apuBurn ?? state.estimate.costs.fuel.apuBurnPerHour
+							apuBurnPerLeg: defaults.apuBurnPerLeg ?? state.estimate.costs.fuel.apuBurnPerLeg,
+							includeApuBurn: defaults.includeApuBurn ?? state.estimate.costs.fuel.includeApuBurn
 						}
 					},
 					crew: state.estimate.crew.map((member) => ({
@@ -346,7 +348,9 @@ export const costBreakdown = derived(
 		// Fuel costs
 		let fuelGallons = $fuelBurn;
 		if (costs.fuel.includeApuBurn) {
-			fuelGallons += costs.fuel.apuBurnPerHour * $flightTime;
+			const legCount = $calc.estimate.legs.length;
+			const apuGallons = (costs.fuel.apuBurnPerLeg / FUEL_DENSITY_LBS_PER_GAL) * legCount;
+			fuelGallons += apuGallons;
 		}
 		const fuelCost = fuelGallons * costs.fuel.pricePerGallon;
 

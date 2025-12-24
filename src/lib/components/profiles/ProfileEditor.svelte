@@ -11,7 +11,8 @@
 		hotelRate: 200,
 		mealsRate: 75,
 		maintenanceRate: 150,
-		apuBurn: 50,
+		apuBurnPerLeg: 0,
+		includeApuBurn: false,
 		fuelPrice: 5.5
 	});
 	let error = $state('');
@@ -33,7 +34,8 @@
 					hotelRate: 200,
 					mealsRate: 75,
 					maintenanceRate: 150,
-					apuBurn: 50,
+					apuBurnPerLeg: 0,
+					includeApuBurn: false,
 					fuelPrice: 5.5
 				};
 			}
@@ -159,14 +161,26 @@
 					value={defaults.maintenanceRate.toString()}
 					oninput={(e) => handleInputChange('maintenanceRate', e.currentTarget.value)}
 				/>
-				<Input
-					type="number"
-					label="APU Burn (gal/hr)"
-					min="0"
-					step="5"
-					value={defaults.apuBurn.toString()}
-					oninput={(e) => handleInputChange('apuBurn', e.currentTarget.value)}
-				/>
+				<div class="flex flex-col gap-2">
+					<label class="flex cursor-pointer items-center gap-2">
+						<input
+							type="checkbox"
+							bind:checked={defaults.includeApuBurn}
+							class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+						/>
+						<span class="text-sm text-gray-700">Include APU burn</span>
+					</label>
+					{#if defaults.includeApuBurn}
+						<Input
+							type="number"
+							label="APU Burn (lbs/leg)"
+							min="0"
+							step="10"
+							value={defaults.apuBurnPerLeg.toString()}
+							oninput={(e) => handleInputChange('apuBurnPerLeg', e.currentTarget.value)}
+						/>
+					{/if}
+				</div>
 			</div>
 		</div>
 
