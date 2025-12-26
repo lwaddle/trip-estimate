@@ -1,104 +1,26 @@
 import { writable, derived } from 'svelte/store';
 import type { AircraftProfile } from '$lib/types/database';
 
-// Preset profiles
-const PRESET_PROFILES: AircraftProfile[] = [
-	{
-		id: 'jet-large',
-		name: 'Large Jet',
-		type: 'jet-large',
-		imageUrl: null,
-		defaults: {
-			fuelBurnPerHour: 350,
-			pilotRate: 1000,
-			attendantRate: 600,
-			hotelRate: 250,
-			mealsRate: 100,
-			maintenanceRate: 250,
-			apuBurnPerLeg: 150,
-			includeApuBurn: false,
-			fuelPrice: 5.5
-		},
-		isCustom: false,
-		isDefault: false
+// Standard built-in profile
+const STANDARD_PROFILE: AircraftProfile = {
+	id: 'standard',
+	name: 'Standard',
+	imageUrl: null,
+	defaults: {
+		fuelPrice: 5.5,
+		fuelDensity: 6.7,
+		pilotsRequired: 2,
+		pilotRate: 1400,
+		attendantsRequired: 0,
+		attendantRate: 500,
+		hotelRate: 200,
+		mealsRate: 75,
+		maintenanceRate: 600,
+		apuBurnPerLeg: 0
 	},
-	{
-		id: 'jet-medium',
-		name: 'Medium Jet',
-		type: 'jet-medium',
-		imageUrl: null,
-		defaults: {
-			fuelBurnPerHour: 250,
-			pilotRate: 900,
-			attendantRate: 550,
-			hotelRate: 225,
-			mealsRate: 85,
-			maintenanceRate: 200,
-			apuBurnPerLeg: 120,
-			includeApuBurn: false,
-			fuelPrice: 5.5
-		},
-		isCustom: false,
-		isDefault: false
-	},
-	{
-		id: 'jet-small',
-		name: 'Small Jet',
-		type: 'jet-small',
-		imageUrl: null,
-		defaults: {
-			fuelBurnPerHour: 180,
-			pilotRate: 800,
-			attendantRate: 500,
-			hotelRate: 200,
-			mealsRate: 75,
-			maintenanceRate: 150,
-			apuBurnPerLeg: 100,
-			includeApuBurn: false,
-			fuelPrice: 5.5
-		},
-		isCustom: false,
-		isDefault: true
-	},
-	{
-		id: 'turboprop-twin',
-		name: 'Twin Turboprop',
-		type: 'turboprop-twin',
-		imageUrl: null,
-		defaults: {
-			fuelBurnPerHour: 120,
-			pilotRate: 700,
-			attendantRate: 450,
-			hotelRate: 175,
-			mealsRate: 65,
-			maintenanceRate: 100,
-			apuBurnPerLeg: 60,
-			includeApuBurn: false,
-			fuelPrice: 5.5
-		},
-		isCustom: false,
-		isDefault: false
-	},
-	{
-		id: 'turboprop-single',
-		name: 'Single Turboprop',
-		type: 'turboprop-single',
-		imageUrl: null,
-		defaults: {
-			fuelBurnPerHour: 60,
-			pilotRate: 600,
-			attendantRate: 400,
-			hotelRate: 150,
-			mealsRate: 55,
-			maintenanceRate: 75,
-			apuBurnPerLeg: 0,
-			includeApuBurn: false,
-			fuelPrice: 5.5
-		},
-		isCustom: false,
-		isDefault: false
-	}
-];
+	isCustom: false,
+	isDefault: true
+};
 
 interface ProfilesStore {
 	profiles: AircraftProfile[];
@@ -108,8 +30,8 @@ interface ProfilesStore {
 }
 
 const initialState: ProfilesStore = {
-	profiles: [...PRESET_PROFILES],
-	selectedId: 'jet-small',
+	profiles: [STANDARD_PROFILE],
+	selectedId: 'standard',
 	editingProfile: null,
 	loading: false
 };
@@ -129,7 +51,7 @@ function createProfilesStore() {
 		loadProfiles: (customProfiles: AircraftProfile[], defaultId: string | null) => {
 			update((state) => ({
 				...state,
-				profiles: [...PRESET_PROFILES, ...customProfiles],
+				profiles: [STANDARD_PROFILE, ...customProfiles],
 				selectedId: defaultId || state.selectedId,
 				loading: false
 			}));
@@ -156,7 +78,7 @@ function createProfilesStore() {
 			update((state) => ({
 				...state,
 				profiles: state.profiles.filter((p) => p.id !== id),
-				selectedId: state.selectedId === id ? 'jet-small' : state.selectedId
+				selectedId: state.selectedId === id ? 'standard' : state.selectedId
 			}));
 		},
 
@@ -209,8 +131,8 @@ function createProfilesStore() {
 		// Reset
 		reset: () => set(initialState),
 
-		// Get preset profiles
-		getPresets: () => PRESET_PROFILES
+		// Get standard profile
+		getStandardProfile: () => STANDARD_PROFILE
 	};
 }
 
@@ -225,5 +147,5 @@ export const customProfiles = derived(profiles, ($profiles) => {
 });
 
 export const defaultProfile = derived(profiles, ($profiles) => {
-	return $profiles.profiles.find((p) => p.isDefault) || PRESET_PROFILES[2];
+	return $profiles.profiles.find((p) => p.isDefault) || STANDARD_PROFILE;
 });

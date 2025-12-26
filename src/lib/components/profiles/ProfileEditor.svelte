@@ -4,16 +4,18 @@
 	import type { AircraftProfile } from '$lib/types/database';
 
 	let name = $state('');
+	let isDefault = $state(false);
 	let defaults = $state({
-		fuelBurnPerHour: 200,
+		fuelPrice: 5.5,
+		fuelDensity: 6.7,
+		pilotsRequired: 2,
 		pilotRate: 800,
+		attendantsRequired: 0,
 		attendantRate: 500,
 		hotelRate: 200,
 		mealsRate: 75,
 		maintenanceRate: 150,
-		apuBurnPerLeg: 0,
-		includeApuBurn: false,
-		fuelPrice: 5.5
+		apuBurnPerLeg: 0
 	});
 	let error = $state('');
 
@@ -23,20 +25,23 @@
 			if ($profiles.editingProfile) {
 				// Editing existing
 				name = $profiles.editingProfile.name;
+				isDefault = $profiles.editingProfile.isDefault;
 				defaults = { ...$profiles.editingProfile.defaults };
 			} else {
 				// Creating new
 				name = '';
+				isDefault = false;
 				defaults = {
-					fuelBurnPerHour: 200,
+					fuelPrice: 5.5,
+					fuelDensity: 6.7,
+					pilotsRequired: 2,
 					pilotRate: 800,
+					attendantsRequired: 0,
 					attendantRate: 500,
 					hotelRate: 200,
 					mealsRate: 75,
 					maintenanceRate: 150,
-					apuBurnPerLeg: 0,
-					includeApuBurn: false,
-					fuelPrice: 5.5
+					apuBurnPerLeg: 0
 				};
 			}
 			error = '';
@@ -62,19 +67,24 @@
 				name: name.trim(),
 				defaults
 			});
+			if (isDefault) {
+				profiles.setDefault($profiles.editingProfile.id);
+			}
 			ui.showToast('Profile updated', 'success');
 		} else {
 			// Create new
 			const newProfile: AircraftProfile = {
 				id: crypto.randomUUID(),
 				name: name.trim(),
-				type: 'custom',
 				imageUrl: null,
 				defaults,
 				isCustom: true,
 				isDefault: false
 			};
 			profiles.addProfile(newProfile);
+			if (isDefault) {
+				profiles.setDefault(newProfile.id);
+			}
 			ui.showToast('Profile created', 'success');
 		}
 
@@ -83,6 +93,10 @@
 
 	function handleInputChange(field: keyof typeof defaults, value: string) {
 		defaults = { ...defaults, [field]: parseFloat(value) || 0 };
+	}
+
+	function handleIntInputChange(field: keyof typeof defaults, value: string) {
+		defaults = { ...defaults, [field]: parseInt(value) || 0 };
 	}
 </script>
 
@@ -99,47 +113,81 @@
 			</div>
 		{/if}
 
-		<Input label="Profile Name" bind:value={name} placeholder="e.g., My Citation X" required />
+		<Input label="Name" bind:value={name} placeholder="e.g., My Citation X" required />
 
+		<!-- Fuel Settings -->
 		<div class="border-t border-gray-200 pt-4">
-			<h3 class="mb-4 text-sm font-medium text-gray-900">Default Values</h3>
-
+			<h3 class="mb-4 text-sm font-medium text-gray-900">Fuel Settings</h3>
 			<div class="grid gap-4 sm:grid-cols-2">
 				<Input
 					type="number"
-					label="Fuel Burn (gal/hr)"
+					label="Fuel Price ($/gallon)"
 					min="0"
-					step="10"
-					value={defaults.fuelBurnPerHour.toString()}
-					oninput={(e) => handleInputChange('fuelBurnPerHour', e.currentTarget.value)}
-				/>
-				<Input
-					type="number"
-					label="Fuel Price ($/gal)"
-					min="0"
-					step="0.10"
+					step="0.01"
 					value={defaults.fuelPrice.toString()}
 					oninput={(e) => handleInputChange('fuelPrice', e.currentTarget.value)}
+					required
 				/>
 				<Input
 					type="number"
-					label="Pilot Rate ($/day)"
+					label="Fuel Density (lbs/gallon)"
+					min="0"
+					step="0.01"
+					value={defaults.fuelDensity.toString()}
+					oninput={(e) => handleInputChange('fuelDensity', e.currentTarget.value)}
+					required
+				/>
+			</div>
+		</div>
+
+		<!-- Crew -->
+		<div class="border-t border-gray-200 pt-4">
+			<h3 class="mb-4 text-sm font-medium text-gray-900">Crew</h3>
+			<div class="grid gap-4 sm:grid-cols-2">
+				<Input
+					type="number"
+					label="Pilots Required"
+					min="0"
+					step="1"
+					value={defaults.pilotsRequired.toString()}
+					oninput={(e) => handleIntInputChange('pilotsRequired', e.currentTarget.value)}
+					required
+				/>
+				<Input
+					type="number"
+					label="Pilot Daily Rate ($)"
 					min="0"
 					step="50"
 					value={defaults.pilotRate.toString()}
 					oninput={(e) => handleInputChange('pilotRate', e.currentTarget.value)}
+					required
 				/>
 				<Input
 					type="number"
-					label="FA Rate ($/day)"
+					label="Flight Attendants Required"
+					min="0"
+					step="1"
+					value={defaults.attendantsRequired.toString()}
+					oninput={(e) => handleIntInputChange('attendantsRequired', e.currentTarget.value)}
+				/>
+				<Input
+					type="number"
+					label="Flight Attendant Daily Rate ($)"
 					min="0"
 					step="50"
 					value={defaults.attendantRate.toString()}
 					oninput={(e) => handleInputChange('attendantRate', e.currentTarget.value)}
 				/>
+			</div>
+		</div>
+
+		<!-- Crew Expenses -->
+		<div class="border-t border-gray-200 pt-4">
+			<h3 class="mb-4 text-sm font-medium text-gray-900">Crew Expenses</h3>
+			<div class="grid gap-4 sm:grid-cols-2">
 				<Input
 					type="number"
-					label="Hotel Rate ($/night)"
+					label="Hotel ($/night/person)"
 					min="0"
 					step="25"
 					value={defaults.hotelRate.toString()}
@@ -147,41 +195,48 @@
 				/>
 				<Input
 					type="number"
-					label="Meals Rate ($/day)"
+					label="Meals ($/day/person)"
 					min="0"
 					step="10"
 					value={defaults.mealsRate.toString()}
 					oninput={(e) => handleInputChange('mealsRate', e.currentTarget.value)}
 				/>
+			</div>
+		</div>
+
+		<!-- Aircraft Operations -->
+		<div class="border-t border-gray-200 pt-4">
+			<h3 class="mb-4 text-sm font-medium text-gray-900">Aircraft Operations</h3>
+			<div class="grid gap-4 sm:grid-cols-2">
 				<Input
 					type="number"
-					label="Maintenance ($/hr)"
+					label="Maintenance Programs ($/hour)"
 					min="0"
 					step="25"
 					value={defaults.maintenanceRate.toString()}
 					oninput={(e) => handleInputChange('maintenanceRate', e.currentTarget.value)}
 				/>
-				<div class="flex flex-col gap-2">
-					<label class="flex cursor-pointer items-center gap-2">
-						<input
-							type="checkbox"
-							bind:checked={defaults.includeApuBurn}
-							class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-						/>
-						<span class="text-sm text-gray-700">Include APU burn</span>
-					</label>
-					{#if defaults.includeApuBurn}
-						<Input
-							type="number"
-							label="APU Burn (lbs/leg)"
-							min="0"
-							step="10"
-							value={defaults.apuBurnPerLeg.toString()}
-							oninput={(e) => handleInputChange('apuBurnPerLeg', e.currentTarget.value)}
-						/>
-					{/if}
-				</div>
+				<Input
+					type="number"
+					label="APU Burn (lbs/leg)"
+					min="0"
+					step="10"
+					value={defaults.apuBurnPerLeg.toString()}
+					oninput={(e) => handleInputChange('apuBurnPerLeg', e.currentTarget.value)}
+				/>
 			</div>
+		</div>
+
+		<!-- Default Profile -->
+		<div class="rounded-lg bg-gray-50 p-4">
+			<label class="flex cursor-pointer items-center gap-3">
+				<input
+					type="checkbox"
+					bind:checked={isDefault}
+					class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+				/>
+				<span class="text-sm text-gray-700">Make this my default profile</span>
+			</label>
 		</div>
 
 		<div class="flex justify-end gap-3 border-t border-gray-200 pt-4">
@@ -189,7 +244,7 @@
 				Cancel
 			</Button>
 			<Button type="submit">
-				{$profiles.editingProfile ? 'Update' : 'Create'} Profile
+				Save Profile
 			</Button>
 		</div>
 	</form>

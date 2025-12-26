@@ -11,15 +11,6 @@
 
 	let { profile, selected, onSelect }: Props = $props();
 
-	const typeLabels: Record<string, string> = {
-		'jet-large': 'Large Jet',
-		'jet-medium': 'Medium Jet',
-		'jet-small': 'Small Jet',
-		'turboprop-twin': 'Twin Turboprop',
-		'turboprop-single': 'Single Turboprop',
-		custom: 'Custom'
-	};
-
 	function handleEdit() {
 		profiles.startEditing(profile);
 		ui.openModal('profileEditor');
@@ -58,25 +49,24 @@
 
 	<div class="mb-3">
 		<h3 class="font-semibold text-gray-900">{profile.name}</h3>
-		<p class="text-sm text-gray-500">{typeLabels[profile.type] || profile.type}</p>
 	</div>
 
 	<div class="mb-4 grid grid-cols-2 gap-2 text-sm">
 		<div>
-			<span class="text-gray-500">Fuel burn:</span>
-			<span class="ml-1 font-medium text-gray-900">{profile.defaults.fuelBurnPerHour} gal/hr</span>
+			<span class="text-gray-500">Pilots:</span>
+			<span class="ml-1 font-medium text-gray-900">{profile.defaults.pilotsRequired}</span>
+		</div>
+		<div>
+			<span class="text-gray-500">FAs:</span>
+			<span class="ml-1 font-medium text-gray-900">{profile.defaults.attendantsRequired}</span>
+		</div>
+		<div>
+			<span class="text-gray-500">Fuel:</span>
+			<span class="ml-1 font-medium text-gray-900">${profile.defaults.fuelPrice}/gal</span>
 		</div>
 		<div>
 			<span class="text-gray-500">Maint:</span>
 			<span class="ml-1 font-medium text-gray-900">${profile.defaults.maintenanceRate}/hr</span>
-		</div>
-		<div>
-			<span class="text-gray-500">Pilot:</span>
-			<span class="ml-1 font-medium text-gray-900">${profile.defaults.pilotRate}/day</span>
-		</div>
-		<div>
-			<span class="text-gray-500">FA:</span>
-			<span class="ml-1 font-medium text-gray-900">${profile.defaults.attendantRate}/day</span>
 		</div>
 	</div>
 

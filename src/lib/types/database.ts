@@ -103,7 +103,7 @@ export interface CostCategory {
 	};
 	fuel: {
 		pricePerGallon: number;
-		includeApuBurn: boolean;
+		fuelDensity: number;
 		apuBurnPerLeg: number;
 	};
 	airport: {
@@ -134,18 +134,18 @@ export interface EstimateData {
 export interface AircraftProfile {
 	id: string;
 	name: string;
-	type: 'jet-large' | 'jet-medium' | 'jet-small' | 'turboprop-twin' | 'turboprop-single' | 'custom';
 	imageUrl: string | null;
 	defaults: {
-		fuelBurnPerHour: number;
+		fuelPrice: number;
+		fuelDensity: number;
+		pilotsRequired: number;
 		pilotRate: number;
+		attendantsRequired: number;
 		attendantRate: number;
 		hotelRate: number;
 		mealsRate: number;
 		maintenanceRate: number;
 		apuBurnPerLeg: number;
-		includeApuBurn: boolean;
-		fuelPrice: number;
 	};
 	isCustom: boolean;
 	isDefault: boolean;

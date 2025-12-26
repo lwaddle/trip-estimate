@@ -75,11 +75,10 @@
 		input.click();
 	}
 
-	const presetProfiles = $derived($profiles.profiles.filter((p) => !p.isCustom));
 	const customProfiles = $derived($profiles.profiles.filter((p) => p.isCustom));
 </script>
 
-<div class="space-y-8">
+<div class="space-y-6">
 	<!-- Actions -->
 	<div class="flex flex-wrap gap-3">
 		<Button onclick={handleCreateNew}>
@@ -114,29 +113,10 @@
 		{/if}
 	</div>
 
-	<!-- Preset Profiles -->
-	<div>
-		<h3 class="mb-4 text-lg font-semibold text-gray-900">Preset Profiles</h3>
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each presetProfiles as profile (profile.id)}
-				<ProfileCard {profile} selected={$profiles.selectedId === profile.id} onSelect={handleSelect} />
-			{/each}
-		</div>
+	<!-- All Profiles -->
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		{#each $profiles.profiles as profile (profile.id)}
+			<ProfileCard {profile} selected={$profiles.selectedId === profile.id} onSelect={handleSelect} />
+		{/each}
 	</div>
-
-	<!-- Custom Profiles -->
-	{#if customProfiles.length > 0}
-		<div>
-			<h3 class="mb-4 text-lg font-semibold text-gray-900">Custom Profiles</h3>
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each customProfiles as profile (profile.id)}
-					<ProfileCard
-						{profile}
-						selected={$profiles.selectedId === profile.id}
-						onSelect={handleSelect}
-					/>
-				{/each}
-			</div>
-		</div>
-	{/if}
 </div>
