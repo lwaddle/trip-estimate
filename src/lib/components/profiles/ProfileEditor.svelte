@@ -212,7 +212,7 @@
 					type="number"
 					label="Maintenance Programs ($/hour)"
 					min="0"
-					step="25"
+					step="0.01"
 					value={defaults.maintenanceRate.toString()}
 					oninput={(e) => handleInputChange('maintenanceRate', e.currentTarget.value)}
 				/>
