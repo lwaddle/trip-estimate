@@ -34,10 +34,10 @@
 </script>
 
 <div class="space-y-6">
-	<!-- Hourly Programs -->
+	<!-- Hourly Programs & Reserves -->
 	<div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
 		<div class="mb-4">
-			<h2 class="text-lg font-semibold text-gray-900">Hourly Programs</h2>
+			<h2 class="text-lg font-semibold text-gray-900">Hourly Programs & Reserves</h2>
 			<p class="text-sm text-gray-500">
 				Total flight time: {formatHours($totalFlightTime)}
 			</p>
@@ -75,42 +75,35 @@
 		<div class="mb-4">
 			<h2 class="text-lg font-semibold text-gray-900">Fuel</h2>
 			<p class="text-sm text-gray-500">
-				Total fuel burn: {$totalFuelBurn.toLocaleString()} gallons
+				Total fuel burn: {$totalFuelBurn.toLocaleString(undefined, { maximumFractionDigits: 1 })} gallons
 			</p>
 		</div>
-		<div class="grid gap-4 sm:grid-cols-2">
+		<div class="grid gap-4 sm:grid-cols-3">
 			<Input
 				type="number"
-				label="Price per Gallon"
+				label="Price per Gallon ($)"
 				min="0"
 				step="0.10"
 				value={$calculator.estimate.costs.fuel.pricePerGallon.toString()}
 				oninput={(e) => handleFuelChange('pricePerGallon', e.currentTarget.value)}
 			/>
-			<div class="flex items-end gap-4 pb-2">
-				<label class="flex cursor-pointer items-center gap-2">
-					<input
-						type="checkbox"
-						checked={$calculator.estimate.costs.fuel.includeApuBurn}
-						onchange={(e) => handleFuelChange('includeApuBurn', e.currentTarget.checked)}
-						class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-					/>
-					<span class="text-sm text-gray-700">Include APU burn</span>
-				</label>
-			</div>
+			<Input
+				type="number"
+				label="Fuel Density (lbs/gal)"
+				min="0"
+				step="0.01"
+				value={$calculator.estimate.costs.fuel.fuelDensity.toString()}
+				oninput={(e) => handleFuelChange('fuelDensity', e.currentTarget.value)}
+			/>
+			<Input
+				type="number"
+				label="APU Burn (lbs/leg)"
+				min="0"
+				step="10"
+				value={$calculator.estimate.costs.fuel.apuBurnPerLeg.toString()}
+				oninput={(e) => handleFuelChange('apuBurnPerLeg', e.currentTarget.value)}
+			/>
 		</div>
-		{#if $calculator.estimate.costs.fuel.includeApuBurn}
-			<div class="mt-4">
-				<Input
-					type="number"
-					label="APU Burn (lbs/leg)"
-					min="0"
-					step="10"
-					value={$calculator.estimate.costs.fuel.apuBurnPerLeg.toString()}
-					oninput={(e) => handleFuelChange('apuBurnPerLeg', e.currentTarget.value)}
-				/>
-			</div>
-		{/if}
 	</div>
 
 	<!-- Airport & Ground -->

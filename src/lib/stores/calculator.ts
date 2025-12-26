@@ -5,7 +5,7 @@ function generateId(): string {
 	return crypto.randomUUID();
 }
 
-const FUEL_DENSITY_LBS_PER_GAL = 6.7;
+const DEFAULT_FUEL_DENSITY = 6.7;
 
 function createDefaultLeg(): FlightLeg {
 	return {
@@ -22,7 +22,7 @@ function createDefaultCrew(): CrewMember {
 	return {
 		id: generateId(),
 		role: 'pilot',
-		dailyRate: 800
+		dailyRate: 1400
 	};
 }
 
@@ -30,7 +30,7 @@ function createDefaultCosts(): CostCategory {
 	return {
 		crew: {
 			hotelPerNight: 200,
-			numberOfNights: 1,
+			numberOfNights: 0,
 			mealsPerDay: 75,
 			numberOfDays: 1,
 			perPersonExpenses: 0,
@@ -39,13 +39,13 @@ function createDefaultCosts(): CostCategory {
 			mileage: 0
 		},
 		hourly: {
-			maintenanceProgram: 150,
+			maintenanceProgram: 600,
 			consumables: 25,
 			additionalReserve: 0
 		},
 		fuel: {
 			pricePerGallon: 5.5,
-			includeApuBurn: false,
+			fuelDensity: DEFAULT_FUEL_DENSITY,
 			apuBurnPerLeg: 0
 		},
 		airport: {
@@ -69,7 +69,7 @@ function createDefaultCosts(): CostCategory {
 function createDefaultEstimate(): EstimateData {
 	return {
 		legs: [createDefaultLeg()],
-		crew: [createDefaultCrew()],
+		crew: [createDefaultCrew(), createDefaultCrew()],
 		costs: createDefaultCosts(),
 		notes: '',
 		profileId: null
@@ -257,49 +257,83 @@ function createCalculatorStore() {
 
 		// Apply profile defaults
 		applyProfileDefaults: (defaults: {
-			fuelBurnPerHour?: number;
+			fuelPrice?: number;
+			fuelDensity?: number;
+			pilotsRequired?: number;
 			pilotRate?: number;
+			attendantsRequired?: number;
 			attendantRate?: number;
 			hotelRate?: number;
 			mealsRate?: number;
 			maintenanceRate?: number;
 			apuBurnPerLeg?: number;
-			includeApuBurn?: boolean;
-			fuelPrice?: number;
 		}) => {
-			update((state) => ({
-				...state,
-				estimate: {
-					...state.estimate,
-					costs: {
-						...state.estimate.costs,
-						crew: {
-							...state.estimate.costs.crew,
-							hotelPerNight: defaults.hotelRate ?? state.estimate.costs.crew.hotelPerNight,
-							mealsPerDay: defaults.mealsRate ?? state.estimate.costs.crew.mealsPerDay
-						},
-						hourly: {
-							...state.estimate.costs.hourly,
-							maintenanceProgram:
-								defaults.maintenanceRate ?? state.estimate.costs.hourly.maintenanceProgram
-						},
-						fuel: {
-							...state.estimate.costs.fuel,
-							pricePerGallon: defaults.fuelPrice ?? state.estimate.costs.fuel.pricePerGallon,
-							apuBurnPerLeg: defaults.apuBurnPerLeg ?? state.estimate.costs.fuel.apuBurnPerLeg,
-							includeApuBurn: defaults.includeApuBurn ?? state.estimate.costs.fuel.includeApuBurn
-						}
-					},
-					crew: state.estimate.crew.map((member) => ({
+			update((state) => {
+				// Build new crew array based on profile requirements
+				let newCrew = [...state.estimate.crew];
+
+				if (defaults.pilotsRequired !== undefined || defaults.attendantsRequired !== undefined) {
+					const pilotsRequired = defaults.pilotsRequired ?? 2;
+					const attendantsRequired = defaults.attendantsRequired ?? 0;
+
+					newCrew = [];
+
+					// Add pilots
+					for (let i = 0; i < pilotsRequired; i++) {
+						newCrew.push({
+							id: generateId(),
+							role: 'pilot',
+							dailyRate: defaults.pilotRate ?? 800
+						});
+					}
+
+					// Add flight attendants
+					for (let i = 0; i < attendantsRequired; i++) {
+						newCrew.push({
+							id: generateId(),
+							role: 'attendant',
+							dailyRate: defaults.attendantRate ?? 500
+						});
+					}
+				} else {
+					// Just update rates on existing crew
+					newCrew = state.estimate.crew.map((member) => ({
 						...member,
 						dailyRate:
 							member.role === 'pilot'
 								? (defaults.pilotRate ?? member.dailyRate)
 								: (defaults.attendantRate ?? member.dailyRate)
-					}))
-				},
-				hasUnsavedChanges: true
-			}));
+					}));
+				}
+
+				return {
+					...state,
+					estimate: {
+						...state.estimate,
+						costs: {
+							...state.estimate.costs,
+							crew: {
+								...state.estimate.costs.crew,
+								hotelPerNight: defaults.hotelRate ?? state.estimate.costs.crew.hotelPerNight,
+								mealsPerDay: defaults.mealsRate ?? state.estimate.costs.crew.mealsPerDay
+							},
+							hourly: {
+								...state.estimate.costs.hourly,
+								maintenanceProgram:
+									defaults.maintenanceRate ?? state.estimate.costs.hourly.maintenanceProgram
+							},
+							fuel: {
+								...state.estimate.costs.fuel,
+								pricePerGallon: defaults.fuelPrice ?? state.estimate.costs.fuel.pricePerGallon,
+								fuelDensity: defaults.fuelDensity ?? state.estimate.costs.fuel.fuelDensity,
+								apuBurnPerLeg: defaults.apuBurnPerLeg ?? state.estimate.costs.fuel.apuBurnPerLeg
+							}
+						},
+						crew: newCrew
+					},
+					hasUnsavedChanges: true
+				};
+			});
 		}
 	};
 }
@@ -315,7 +349,8 @@ export const totalFlightTime = derived(calculator, ($calc) => {
 
 export const totalFuelBurn = derived(calculator, ($calc) => {
 	const totalLbs = $calc.estimate.legs.reduce((total, leg) => total + leg.fuelBurnLbs, 0);
-	return totalLbs / FUEL_DENSITY_LBS_PER_GAL;
+	const fuelDensity = $calc.estimate.costs.fuel.fuelDensity || DEFAULT_FUEL_DENSITY;
+	return totalLbs / fuelDensity;
 });
 
 export const crewCount = derived(calculator, ($calc) => ({
@@ -345,13 +380,12 @@ export const costBreakdown = derived(
 			(costs.hourly.maintenanceProgram + costs.hourly.consumables + costs.hourly.additionalReserve) *
 			$flightTime;
 
-		// Fuel costs
+		// Fuel costs (always include APU burn)
+		const fuelDensity = costs.fuel.fuelDensity || DEFAULT_FUEL_DENSITY;
 		let fuelGallons = $fuelBurn;
-		if (costs.fuel.includeApuBurn) {
-			const legCount = $calc.estimate.legs.length;
-			const apuGallons = (costs.fuel.apuBurnPerLeg / FUEL_DENSITY_LBS_PER_GAL) * legCount;
-			fuelGallons += apuGallons;
-		}
+		const legCount = $calc.estimate.legs.length;
+		const apuGallons = (costs.fuel.apuBurnPerLeg / fuelDensity) * legCount;
+		fuelGallons += apuGallons;
 		const fuelCost = fuelGallons * costs.fuel.pricePerGallon;
 
 		// Airport costs

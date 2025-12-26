@@ -18,7 +18,8 @@ function calculateCosts(data: EstimateData): CostBreakdown {
 		(sum, leg) => sum + leg.flightTimeHours + leg.flightTimeMinutes / 60,
 		0
 	);
-	const totalFuelBurn = legs.reduce((sum, leg) => sum + leg.fuelBurnLbs, 0) / 6.7;
+	const fuelDensity = costs.fuel.fuelDensity || 6.7;
+	const totalFuelBurnLbs = legs.reduce((sum, leg) => sum + leg.fuelBurnLbs, 0);
 	const crewCount = crew.length;
 	const totalDailyRates = crew.reduce((sum, m) => sum + m.dailyRate, 0);
 
@@ -37,10 +38,10 @@ function calculateCosts(data: EstimateData): CostBreakdown {
 			costs.hourly.additionalReserve) *
 		totalFlightTime;
 
-	let fuelGallons = totalFuelBurn;
-	if (costs.fuel.includeApuBurn) {
-		fuelGallons += costs.fuel.apuBurnPerHour * totalFlightTime;
-	}
+	// Convert fuel burn from lbs to gallons and always include APU burn
+	const legCount = legs.length;
+	const apuGallons = (costs.fuel.apuBurnPerLeg / fuelDensity) * legCount;
+	const fuelGallons = (totalFuelBurnLbs / fuelDensity) + apuGallons;
 	const fuelCost = fuelGallons * costs.fuel.pricePerGallon;
 
 	const airportCost =
@@ -177,7 +178,7 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 
 	const categories = [
 		{ label: 'Crew Costs', value: costs.crew },
-		{ label: 'Hourly Programs', value: costs.hourly },
+		{ label: 'Hourly Programs & Reserves', value: costs.hourly },
 		{ label: 'Fuel', value: costs.fuel },
 		{ label: 'Airport & Ground', value: costs.airport },
 		{ label: 'Miscellaneous', value: costs.misc }

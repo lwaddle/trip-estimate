@@ -47,7 +47,8 @@
 		const { costs, crew, legs } = data;
 
 		const totalFlightTime = legs.reduce((sum, leg) => sum + leg.flightTimeHours + leg.flightTimeMinutes / 60, 0);
-		const totalFuelBurn = legs.reduce((sum, leg) => sum + leg.fuelBurn, 0);
+		const totalFuelBurnLbs = legs.reduce((sum, leg) => sum + leg.fuelBurnLbs, 0);
+		const fuelDensity = costs.fuel.fuelDensity || 6.7;
 		const crewCount = crew.length;
 		const totalDailyRates = crew.reduce((sum, m) => sum + m.dailyRate, 0);
 
@@ -62,10 +63,10 @@
 
 		const hourlyCost = (costs.hourly.maintenanceProgram + costs.hourly.consumables + costs.hourly.additionalReserve) * totalFlightTime;
 
-		let fuelGallons = totalFuelBurn;
-		if (costs.fuel.includeApuBurn) {
-			fuelGallons += costs.fuel.apuBurnPerHour * totalFlightTime;
-		}
+		// Convert fuel burn from lbs to gallons and always include APU burn
+		const legCount = legs.length;
+		const apuGallons = (costs.fuel.apuBurnPerLeg / fuelDensity) * legCount;
+		const fuelGallons = (totalFuelBurnLbs / fuelDensity) + apuGallons;
 		const fuelCost = fuelGallons * costs.fuel.pricePerGallon;
 
 		const airportCost =
