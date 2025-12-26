@@ -1,5 +1,6 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import type { AircraftProfile } from '$lib/types/database';
+import { loadUserProfiles, saveUserProfiles } from '$lib/services/profilesDb';
 
 // Standard built-in profile
 const STANDARD_PROFILE: AircraftProfile = {
@@ -27,17 +28,28 @@ interface ProfilesStore {
 	selectedId: string | null;
 	editingProfile: AircraftProfile | null;
 	loading: boolean;
+	userId: string | null;
 }
 
 const initialState: ProfilesStore = {
 	profiles: [STANDARD_PROFILE],
 	selectedId: 'standard',
 	editingProfile: null,
-	loading: false
+	loading: false,
+	userId: null
 };
 
 function createProfilesStore() {
 	const { subscribe, set, update } = writable<ProfilesStore>(initialState);
+
+	// Helper to persist to database
+	async function persistToDb() {
+		const state = get({ subscribe });
+		if (!state.userId) return;
+
+		const defaultProfile = state.profiles.find((p) => p.isDefault);
+		await saveUserProfiles(state.userId, state.profiles, defaultProfile?.id || null);
+	}
 
 	return {
 		subscribe,
@@ -48,6 +60,45 @@ function createProfilesStore() {
 		},
 
 		// Load from database
+		loadFromDatabase: async (userId: string) => {
+			update((state) => ({ ...state, loading: true, userId }));
+
+			const result = await loadUserProfiles(userId);
+
+			if (result) {
+				// Determine which profile should be marked as default
+				const defaultId = result.defaultId;
+
+				// Update isDefault flag on loaded profiles
+				const customProfiles = result.profiles.map((p) => ({
+					...p,
+					isDefault: p.id === defaultId
+				}));
+
+				// Check if Standard should be default
+				const standardIsDefault = defaultId === 'standard' || !defaultId;
+
+				update((state) => ({
+					...state,
+					profiles: [
+						{ ...STANDARD_PROFILE, isDefault: standardIsDefault },
+						...customProfiles
+					],
+					selectedId: defaultId || 'standard',
+					loading: false
+				}));
+			} else {
+				// No saved profiles, just use Standard
+				update((state) => ({
+					...state,
+					profiles: [STANDARD_PROFILE],
+					selectedId: 'standard',
+					loading: false
+				}));
+			}
+		},
+
+		// Legacy load method (for compatibility)
 		loadProfiles: (customProfiles: AircraftProfile[], defaultId: string | null) => {
 			update((state) => ({
 				...state,
@@ -63,6 +114,7 @@ function createProfilesStore() {
 				...state,
 				profiles: [...state.profiles, profile]
 			}));
+			persistToDb();
 		},
 
 		// Update profile
@@ -71,6 +123,7 @@ function createProfilesStore() {
 				...state,
 				profiles: state.profiles.map((p) => (p.id === id ? { ...p, ...updates } : p))
 			}));
+			persistToDb();
 		},
 
 		// Delete profile
@@ -80,6 +133,7 @@ function createProfilesStore() {
 				profiles: state.profiles.filter((p) => p.id !== id),
 				selectedId: state.selectedId === id ? 'standard' : state.selectedId
 			}));
+			persistToDb();
 		},
 
 		// Duplicate profile
@@ -101,6 +155,7 @@ function createProfilesStore() {
 					profiles: [...state.profiles, newProfile]
 				};
 			});
+			persistToDb();
 		},
 
 		// Set default profile
@@ -112,6 +167,7 @@ function createProfilesStore() {
 					isDefault: p.id === id
 				}))
 			}));
+			persistToDb();
 		},
 
 		// Edit mode
@@ -128,7 +184,7 @@ function createProfilesStore() {
 			update((state) => ({ ...state, loading }));
 		},
 
-		// Reset
+		// Reset (on logout)
 		reset: () => set(initialState),
 
 		// Get standard profile

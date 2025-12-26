@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { createSupabaseClient } from '$lib/supabase';
-	import { auth } from '$lib/stores';
+	import { auth, profiles } from '$lib/stores';
 	import { Header } from '$lib/components/layout';
 	import { AuthModal } from '$lib/components/auth';
 	import { ToastContainer } from '$lib/components/ui';
@@ -20,6 +20,10 @@
 		// Get initial session
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			auth.setSession(session);
+			// Load profiles if user is logged in
+			if (session?.user) {
+				profiles.loadFromDatabase(session.user.id);
+			}
 		});
 
 		// Listen for auth changes
@@ -27,6 +31,12 @@
 			data: { subscription }
 		} = supabase.auth.onAuthStateChange((_event, session) => {
 			auth.setSession(session);
+			// Load or reset profiles based on auth state
+			if (session?.user) {
+				profiles.loadFromDatabase(session.user.id);
+			} else {
+				profiles.reset();
+			}
 		});
 
 		return () => {
