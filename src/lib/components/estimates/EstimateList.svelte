@@ -164,7 +164,7 @@
 		{#each estimates as estimate (estimate.id)}
 			<div class="group relative rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200 transition-shadow hover:shadow-md">
 				<div class="mb-4">
-					<h3 class="font-semibold text-gray-900 group-hover:text-blue-600">
+					<h3 class="font-semibold text-gray-900 group-hover:text-red-700">
 						{estimate.name}
 					</h3>
 					<p class="mt-1 text-sm text-gray-500">

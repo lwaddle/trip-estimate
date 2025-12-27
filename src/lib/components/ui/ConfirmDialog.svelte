@@ -28,7 +28,7 @@
 	const buttonVariants = {
 		danger: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
 		warning: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
-		default: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+		default: 'bg-red-700 hover:bg-red-800 focus:ring-red-500'
 	};
 
 	async function handleConfirm() {

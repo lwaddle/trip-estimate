@@ -14,19 +14,19 @@
 
 <div class="flex flex-1 flex-col">
 	<!-- Hero Section -->
-	<section class="bg-gradient-to-br from-blue-600 to-blue-800 py-20 text-white">
+	<section class="bg-gradient-to-br from-red-700 to-red-900 py-20 text-white">
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="text-center">
 				<h1 class="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
 					Aviation Cost Estimation
 				</h1>
-				<p class="mx-auto mt-6 max-w-2xl text-lg text-blue-100 sm:text-xl">
+				<p class="mx-auto mt-6 max-w-2xl text-lg text-red-100 sm:text-xl">
 					Calculate trip costs for private aviation with precision. Track fuel, crew expenses,
 					airport fees, and more in one powerful tool.
 				</p>
 				<div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 					<a href="/calculator">
-						<Button size="lg" class="bg-white text-blue-600 hover:bg-blue-50">
+						<Button size="lg" class="bg-white text-red-700 hover:bg-red-50">
 							Try Calculator
 						</Button>
 					</a>
@@ -53,7 +53,7 @@
 			<div class="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
 				<!-- Feature 1 -->
 				<div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-					<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+					<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 text-red-600">
 						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
 						</svg>

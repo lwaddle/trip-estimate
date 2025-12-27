@@ -65,7 +65,7 @@
 						}}
 						class="flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100"
 					>
-						<div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+						<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600">
 							{$auth.user?.email?.[0]?.toUpperCase() || 'U'}
 						</div>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

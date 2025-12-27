@@ -45,12 +45,12 @@
 
 <div
 	class="relative rounded-xl border-2 bg-white p-4 transition-all {selected
-		? 'border-blue-500 ring-2 ring-blue-100'
+		? 'border-red-700 ring-2 ring-red-100'
 		: 'border-gray-200 hover:border-gray-300'}"
 >
 	{#if profile.isDefault}
 		<span
-			class="absolute -top-2 right-3 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700"
+			class="absolute -top-2 right-3 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700"
 		>
 			Default
 		</span>
