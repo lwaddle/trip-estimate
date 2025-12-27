@@ -241,7 +241,12 @@ function createCalculatorStore() {
 						hasUnsavedChanges: false
 					};
 				}
-				return state;
+				// For new estimates with no original, reset to defaults
+				return {
+					...state,
+					estimate: createDefaultEstimate(),
+					hasUnsavedChanges: false
+				};
 			});
 		},
 
