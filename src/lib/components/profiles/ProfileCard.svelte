@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { profiles, ui } from '$lib/stores';
-	import { Button } from '$lib/components/ui';
+	import { Button, ConfirmDialog } from '$lib/components/ui';
 	import type { AircraftProfile } from '$lib/types/database';
 
 	interface Props {
@@ -10,6 +10,8 @@
 	}
 
 	let { profile, selected, onSelect }: Props = $props();
+
+	let showDeleteConfirm = $state(false);
 
 	function handleEdit() {
 		profiles.startEditing(profile);
@@ -22,10 +24,17 @@
 	}
 
 	function handleDelete() {
-		if (confirm(`Delete "${profile.name}"? This cannot be undone.`)) {
-			profiles.deleteProfile(profile.id);
-			ui.showToast('Profile deleted', 'success');
-		}
+		showDeleteConfirm = true;
+	}
+
+	function confirmDelete() {
+		profiles.deleteProfile(profile.id);
+		ui.showToast('Profile deleted', 'success');
+		showDeleteConfirm = false;
+	}
+
+	function cancelDelete() {
+		showDeleteConfirm = false;
 	}
 
 	function handleSetDefault() {
@@ -105,3 +114,13 @@
 		{/if}
 	</div>
 </div>
+
+<ConfirmDialog
+	open={showDeleteConfirm}
+	title="Delete Profile"
+	message={`Delete "${profile.name}"? This cannot be undone.`}
+	confirmText="Delete"
+	variant="danger"
+	onConfirm={confirmDelete}
+	onCancel={cancelDelete}
+/>

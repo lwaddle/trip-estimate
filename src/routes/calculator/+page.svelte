@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { calculator, isAuthenticated, ui, profiles, selectedProfile } from '$lib/stores';
-	import { Button } from '$lib/components/ui';
+	import { Button, ConfirmDialog } from '$lib/components/ui';
 	import {
 		FlightLegs,
 		CrewSection,
@@ -8,6 +8,8 @@
 		TotalBreakdown,
 		TripNotes
 	} from '$lib/components/calculator';
+
+	let showResetConfirm = $state(false);
 
 	function handleSave() {
 		if (!$isAuthenticated) {
@@ -35,12 +37,21 @@
 
 	function handleReset() {
 		if ($calculator.hasUnsavedChanges) {
-			if (!confirm('You have unsaved changes. Are you sure you want to reset?')) {
-				return;
-			}
+			showResetConfirm = true;
+			return;
 		}
 		calculator.reset();
 		ui.showToast('Calculator reset', 'info');
+	}
+
+	function confirmReset() {
+		calculator.reset();
+		ui.showToast('Calculator reset', 'info');
+		showResetConfirm = false;
+	}
+
+	function cancelReset() {
+		showResetConfirm = false;
 	}
 
 	function handleDiscardChanges() {
@@ -158,3 +169,13 @@
 		</div>
 	</div>
 </div>
+
+<ConfirmDialog
+	open={showResetConfirm}
+	title="Reset Calculator"
+	message="You have unsaved changes. Are you sure you want to reset?"
+	confirmText="Reset"
+	variant="danger"
+	onConfirm={confirmReset}
+	onCancel={cancelReset}
+/>
