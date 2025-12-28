@@ -14,9 +14,9 @@
 	const estimateId = $derived($ui.shareContext?.estimateId ?? $calculator.savedId);
 	const estimateName = $derived($ui.shareContext?.estimateName ?? $calculator.savedName ?? 'Shared Estimate');
 
-	// Generate share link when modal opens
+	// Generate share link when modal opens (only if we don't already have one)
 	$effect(() => {
-		if ($ui.modals.share && estimateId) {
+		if ($ui.modals.share && estimateId && !shareUrl) {
 			generateShareLink();
 		}
 	});
@@ -124,7 +124,7 @@
 					class="flex-1 bg-gray-50"
 					onclick={(e) => e.currentTarget.select()}
 				/>
-				<Button onclick={handleCopy} variant={copied ? 'primary' : 'secondary'}>
+				<Button onclick={handleCopy} variant={copied ? 'primary' : 'secondary'} class="min-w-25">
 					{#if copied}
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
