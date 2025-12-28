@@ -10,9 +10,13 @@
 
 	const supabase = createSupabaseClient();
 
+	// Get the estimate ID and name from either shareContext or calculator store
+	const estimateId = $derived($ui.shareContext?.estimateId ?? $calculator.savedId);
+	const estimateName = $derived($ui.shareContext?.estimateName ?? $calculator.savedName ?? 'Shared Estimate');
+
 	// Generate share link when modal opens
 	$effect(() => {
-		if ($ui.modals.share && $calculator.savedId) {
+		if ($ui.modals.share && estimateId) {
 			generateShareLink();
 		}
 	});
@@ -24,7 +28,7 @@
 	}
 
 	async function generateShareLink() {
-		if (!$calculator.savedId || !$auth.user) return;
+		if (!estimateId || !$auth.user) return;
 
 		loading = true;
 		error = '';
@@ -34,7 +38,7 @@
 			const { data: existing } = await supabase
 				.from('estimate_shares')
 				.select('share_token')
-				.eq('estimate_id', $calculator.savedId)
+				.eq('estimate_id', estimateId)
 				.single();
 
 			if (existing) {
@@ -44,9 +48,9 @@
 				const { data, error: createError } = await supabase
 					.from('estimate_shares')
 					.insert({
-						estimate_id: $calculator.savedId,
+						estimate_id: estimateId,
 						user_id: $auth.user.id,
-						share_name: $calculator.savedName || 'Shared Estimate'
+						share_name: estimateName
 					})
 					.select('share_token')
 					.single();
@@ -76,7 +80,7 @@
 	}
 
 	function handleEmail() {
-		const subject = encodeURIComponent(`Trip Estimate: ${$calculator.savedName || 'Shared Estimate'}`);
+		const subject = encodeURIComponent(`Trip Estimate: ${estimateName}`);
 		const body = encodeURIComponent(`Here's a trip estimate I wanted to share with you:\n\n${shareUrl}`);
 		window.open(`mailto:?subject=${subject}&body=${body}`);
 	}
@@ -85,7 +89,7 @@
 		if (navigator.share) {
 			try {
 				await navigator.share({
-					title: `Trip Estimate: ${$calculator.savedName || 'Shared Estimate'}`,
+					title: `Trip Estimate: ${estimateName}`,
 					url: shareUrl
 				});
 			} catch {
@@ -98,7 +102,7 @@
 <Modal open={$ui.modals.share} title="Share Estimate" size="md" onClose={handleClose}>
 	{#if loading}
 		<div class="flex items-center justify-center py-8">
-			<svg class="h-8 w-8 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
+			<svg class="h-8 w-8 animate-spin text-red-700" fill="none" viewBox="0 0 24 24">
 				<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
 				<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
 			</svg>

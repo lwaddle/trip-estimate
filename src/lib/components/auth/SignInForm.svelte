@@ -121,7 +121,7 @@
 	</Button>
 
 	<div class="flex flex-col items-center gap-2 text-sm">
-		<button type="button" onclick={toggleMode} class="text-blue-600 hover:text-blue-800">
+		<button type="button" onclick={toggleMode} class="text-red-700 hover:text-red-800">
 			{mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
 		</button>
 

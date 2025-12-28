@@ -102,7 +102,7 @@
 			<select
 				value={$profiles.selectedId || ''}
 				onchange={handleProfileSelect}
-				class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
 			>
 				<option value="">Select Profile</option>
 				{#each $profiles.profiles as profile}
@@ -157,8 +157,8 @@
 			<TotalBreakdown />
 
 			{#if !$isAuthenticated}
-				<div class="mt-6 rounded-xl bg-blue-50 p-4 text-center">
-					<p class="text-sm text-blue-700">
+				<div class="mt-6 rounded-xl bg-gray-50 p-4 text-center">
+					<p class="text-sm text-gray-700">
 						<button type="button" onclick={() => ui.openModal('signIn')} class="font-medium underline hover:no-underline">
 							Sign in
 						</button>

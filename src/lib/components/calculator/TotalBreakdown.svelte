@@ -18,7 +18,7 @@
 
 	const categories = [
 		{ key: 'crew', label: 'Crew Costs', color: 'bg-green-500' },
-		{ key: 'hourly', label: 'Hourly Programs & Reserves', color: 'bg-blue-500' },
+		{ key: 'hourly', label: 'Hourly Programs & Reserves', color: 'bg-red-500' },
 		{ key: 'fuel', label: 'Fuel', color: 'bg-yellow-500' },
 		{ key: 'airport', label: 'Airport & Ground', color: 'bg-purple-500' },
 		{ key: 'misc', label: 'Miscellaneous', color: 'bg-gray-500' }
@@ -38,9 +38,9 @@
 			<p class="text-sm text-gray-500">Fuel (gallons)</p>
 			<p class="text-xl font-semibold text-gray-900">{$costBreakdown.fuelGallons.toLocaleString()}</p>
 		</div>
-		<div class="rounded-lg bg-blue-50 p-4">
-			<p class="text-sm text-blue-600">Total Estimate</p>
-			<p class="text-2xl font-bold text-blue-700">{formatCurrency($costBreakdown.total)}</p>
+		<div class="rounded-lg bg-gray-50 p-4">
+			<p class="text-sm text-gray-600">Total Estimate</p>
+			<p class="text-2xl font-bold text-gray-900">{formatCurrency($costBreakdown.total)}</p>
 		</div>
 	</div>
 

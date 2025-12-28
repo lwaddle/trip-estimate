@@ -77,7 +77,7 @@
 
 	{#if onBack}
 		<div class="text-center">
-			<button type="button" onclick={onBack} class="text-sm text-blue-600 hover:text-blue-800">
+			<button type="button" onclick={onBack} class="text-sm text-red-700 hover:text-red-800">
 				Back to sign in
 			</button>
 		</div>

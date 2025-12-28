@@ -19,11 +19,17 @@ interface ModalState {
 	pdfPreview: boolean;
 }
 
+interface ShareContext {
+	estimateId: string;
+	estimateName: string;
+}
+
 interface UIState {
 	modals: ModalState;
 	toasts: Toast[];
 	mobileMenuOpen: boolean;
 	currentView: 'calculator' | 'estimates' | 'profiles';
+	shareContext: ShareContext | null;
 }
 
 const initialState: UIState = {
@@ -38,7 +44,8 @@ const initialState: UIState = {
 	},
 	toasts: [],
 	mobileMenuOpen: false,
-	currentView: 'calculator'
+	currentView: 'calculator',
+	shareContext: null
 };
 
 function createUIStore() {
@@ -59,14 +66,25 @@ function createUIStore() {
 		closeModal: (modal: keyof ModalState) => {
 			update((state) => ({
 				...state,
-				modals: { ...state.modals, [modal]: false }
+				modals: { ...state.modals, [modal]: false },
+				// Clear share context when closing share modal
+				shareContext: modal === 'share' ? null : state.shareContext
 			}));
 		},
 
 		closeAllModals: () => {
 			update((state) => ({
 				...state,
-				modals: initialState.modals
+				modals: initialState.modals,
+				shareContext: null
+			}));
+		},
+
+		openShareModal: (estimateId: string, estimateName: string) => {
+			update((state) => ({
+				...state,
+				shareContext: { estimateId, estimateName },
+				modals: { ...state.modals, share: true }
 			}));
 		},
 

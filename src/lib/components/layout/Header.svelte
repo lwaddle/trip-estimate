@@ -3,6 +3,7 @@
 	import { auth, isAuthenticated, ui } from '$lib/stores';
 	import { Button } from '$lib/components/ui';
 	import { goto } from '$app/navigation';
+	import logoLight from '$lib/assets/logo-light.svg';
 
 	let userMenuOpen = $state(false);
 	const supabase = createSupabaseClient();
@@ -24,16 +25,8 @@
 <header class="border-b border-gray-200 bg-white">
 	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 		<!-- Logo -->
-		<a href="/" class="flex items-center gap-2">
-			<svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-				/>
-			</svg>
-			<span class="text-lg font-semibold text-gray-900">Trip Estimate</span>
+		<a href="/" class="flex items-center">
+			<img src={logoLight} alt="Aviation Trip Estimate" class="h-10" />
 		</a>
 
 		<!-- Desktop Nav -->
@@ -72,7 +65,7 @@
 						}}
 						class="flex items-center gap-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100"
 					>
-						<div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+						<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600">
 							{$auth.user?.email?.[0]?.toUpperCase() || 'U'}
 						</div>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

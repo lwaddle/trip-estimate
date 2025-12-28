@@ -128,11 +128,21 @@ function createProfilesStore() {
 
 		// Delete profile
 		deleteProfile: (id: string) => {
-			update((state) => ({
-				...state,
-				profiles: state.profiles.filter((p) => p.id !== id),
-				selectedId: state.selectedId === id ? 'standard' : state.selectedId
-			}));
+			update((state) => {
+				const deletingDefault = state.profiles.find((p) => p.id === id)?.isDefault;
+
+				return {
+					...state,
+					profiles: state.profiles
+						.filter((p) => p.id !== id)
+						.map((p) => ({
+							...p,
+							// If deleting the default profile, make Standard the new default
+							isDefault: deletingDefault && p.id === 'standard' ? true : p.isDefault
+						})),
+					selectedId: state.selectedId === id ? 'standard' : state.selectedId
+				};
+			});
 			persistToDb();
 		},
 
