@@ -17,11 +17,11 @@
 	}
 
 	const categories = [
-		{ key: 'crew', label: 'Crew Costs', color: 'bg-green-500' },
-		{ key: 'hourly', label: 'Hourly Programs & Reserves', color: 'bg-red-500' },
-		{ key: 'fuel', label: 'Fuel', color: 'bg-yellow-500' },
-		{ key: 'airport', label: 'Airport & Ground', color: 'bg-purple-500' },
-		{ key: 'misc', label: 'Miscellaneous', color: 'bg-gray-500' }
+		{ key: 'crew', label: 'Crew Costs', color: 'bg-red-400' },
+		{ key: 'hourly', label: 'Hourly Programs & Reserves', color: 'bg-red-400' },
+		{ key: 'fuel', label: 'Fuel', color: 'bg-red-400' },
+		{ key: 'airport', label: 'Airport & Ground', color: 'bg-red-400' },
+		{ key: 'misc', label: 'Miscellaneous', color: 'bg-red-400' }
 	] as const;
 </script>
 

@@ -26,7 +26,7 @@
 				</p>
 				<div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
 					<a href="/calculator">
-						<Button size="lg" class="bg-white text-red-700 hover:bg-red-50">
+						<Button size="lg" variant="ghost" class="bg-white text-red-700 hover:bg-red-50 hover:text-red-800">
 							Try Calculator
 						</Button>
 					</a>

@@ -73,6 +73,11 @@
 			}
 		}
 	}
+
+	function handleNewProfile() {
+		profiles.startEditing(null);
+		ui.openModal('profileEditor');
+	}
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -98,18 +103,6 @@
 		</div>
 
 		<div class="flex flex-wrap items-center gap-3">
-			<!-- Profile Selector -->
-			<select
-				value={$profiles.selectedId || ''}
-				onchange={handleProfileSelect}
-				class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
-			>
-				<option value="">Select Profile</option>
-				{#each $profiles.profiles as profile}
-					<option value={profile.id}>{profile.name}</option>
-				{/each}
-			</select>
-
 			<Button variant="secondary" onclick={handleReset}>
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -146,6 +139,26 @@
 	<div class="grid gap-8 lg:grid-cols-3">
 		<!-- Left Column - Calculator -->
 		<div class="space-y-6 lg:col-span-2">
+			<!-- Profile Section -->
+			<div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+				<h2 class="text-lg font-semibold text-gray-900">Profile</h2>
+				<div class="mt-4 border-t border-gray-200 pt-4">
+					<div class="flex items-center gap-4">
+						<select
+							value={$profiles.selectedId || ''}
+							onchange={handleProfileSelect}
+							class="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+						>
+							<option value="">Select Profile</option>
+							{#each $profiles.profiles as profile}
+								<option value={profile.id}>{profile.name}</option>
+							{/each}
+						</select>
+						<Button variant="secondary" onclick={handleNewProfile}>New Profile</Button>
+					</div>
+				</div>
+			</div>
+
 			<FlightLegs />
 			<CrewSection />
 			<CostCategories />
