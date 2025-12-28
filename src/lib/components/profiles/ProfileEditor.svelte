@@ -158,7 +158,7 @@
 					type="number"
 					label="Pilot Daily Rate ($)"
 					min="0"
-					step="50"
+					step="0.01"
 					value={defaults.pilotRate.toString()}
 					oninput={(e) => handleInputChange('pilotRate', e.currentTarget.value)}
 					required
@@ -175,7 +175,7 @@
 					type="number"
 					label="Flight Attendant Daily Rate ($)"
 					min="0"
-					step="50"
+					step="0.01"
 					value={defaults.attendantRate.toString()}
 					oninput={(e) => handleInputChange('attendantRate', e.currentTarget.value)}
 				/>
@@ -190,7 +190,7 @@
 					type="number"
 					label="Hotel ($/night/person)"
 					min="0"
-					step="25"
+					step="0.01"
 					value={defaults.hotelRate.toString()}
 					oninput={(e) => handleInputChange('hotelRate', e.currentTarget.value)}
 				/>
@@ -198,7 +198,7 @@
 					type="number"
 					label="Meals ($/day/person)"
 					min="0"
-					step="10"
+					step="0.01"
 					value={defaults.mealsRate.toString()}
 					oninput={(e) => handleInputChange('mealsRate', e.currentTarget.value)}
 				/>
@@ -221,7 +221,7 @@
 					type="number"
 					label="APU Burn (lbs/leg)"
 					min="0"
-					step="10"
+					step="1"
 					value={defaults.apuBurnPerLeg.toString()}
 					oninput={(e) => handleInputChange('apuBurnPerLeg', e.currentTarget.value)}
 				/>
