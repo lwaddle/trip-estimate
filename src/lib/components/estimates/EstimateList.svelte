@@ -16,9 +16,10 @@
 	interface Props {
 		estimates: Estimate[];
 		onRefresh: () => void;
+		onNewEstimate: () => void;
 	}
 
-	let { estimates, onRefresh }: Props = $props();
+	let { estimates, onRefresh, onNewEstimate }: Props = $props();
 
 	let deleteId = $state<string | null>(null);
 	let deleteName = $state('');
@@ -154,9 +155,7 @@
 		<h3 class="mt-4 text-lg font-medium text-gray-900">No saved estimates</h3>
 		<p class="mt-2 text-gray-500">Create your first estimate to get started.</p>
 		<div class="mt-6">
-			<a href="/calculator">
-				<Button>New Estimate</Button>
-			</a>
+			<Button onclick={onNewEstimate}>New Estimate</Button>
 		</div>
 	</div>
 {:else}

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { createSupabaseClient } from '$lib/supabase';
-	import { isAuthenticated, auth, ui } from '$lib/stores';
+	import { isAuthenticated, auth, ui, calculator } from '$lib/stores';
 	import { Button } from '$lib/components/ui';
 	import { EstimateList } from '$lib/components/estimates';
 	import type { EstimateData } from '$lib/types/database';
@@ -63,6 +63,16 @@
 			loadEstimates();
 		}
 	});
+
+	function handleNewEstimate() {
+		if ($calculator.hasUnsavedChanges) {
+			if (!confirm('You have unsaved changes. Start a new estimate anyway?')) {
+				return;
+			}
+		}
+		calculator.reset();
+		goto('/calculator');
+	}
 </script>
 
 <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -73,14 +83,12 @@
 				{estimates.length} saved estimate{estimates.length !== 1 ? 's' : ''}
 			</p>
 		</div>
-		<a href="/calculator">
-			<Button>
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-				</svg>
-				New Estimate
-			</Button>
-		</a>
+		<Button onclick={handleNewEstimate}>
+			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+			</svg>
+			New Estimate
+		</Button>
 	</div>
 
 	{#if loading}
@@ -98,6 +106,6 @@
 			</button>
 		</div>
 	{:else}
-		<EstimateList {estimates} onRefresh={loadEstimates} />
+		<EstimateList {estimates} onRefresh={loadEstimates} onNewEstimate={handleNewEstimate} />
 	{/if}
 </div>
