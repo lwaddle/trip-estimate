@@ -233,7 +233,7 @@
 				<input
 					type="checkbox"
 					bind:checked={isDefault}
-					class="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+					class="h-5 w-5 rounded border-gray-300 accent-red-700 focus:ring-red-500"
 				/>
 				<span class="text-sm text-gray-700">Make this my default profile</span>
 			</label>
