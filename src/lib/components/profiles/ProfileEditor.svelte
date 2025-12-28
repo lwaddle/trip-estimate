@@ -82,6 +82,7 @@
 				isDefault: false
 			};
 			profiles.addProfile(newProfile);
+			profiles.select(newProfile.id);
 			if (isDefault) {
 				profiles.setDefault(newProfile.id);
 			}
