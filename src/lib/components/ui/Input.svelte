@@ -11,7 +11,7 @@
 	let { label, error, hint, id, value = $bindable(''), class: className = '', ...rest }: Props =
 		$props();
 
-	const inputId = id || `input-${crypto.randomUUID().slice(0, 8)}`;
+	const inputId = $derived(id || `input-${crypto.randomUUID().slice(0, 8)}`);
 </script>
 
 <div class="w-full">

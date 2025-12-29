@@ -10,7 +10,7 @@
 
 	let { label, error, id, class: className = '', children, ...rest }: Props = $props();
 
-	const selectId = id || `select-${crypto.randomUUID().slice(0, 8)}`;
+	const selectId = $derived(id || `select-${crypto.randomUUID().slice(0, 8)}`);
 </script>
 
 <div class="w-full">
