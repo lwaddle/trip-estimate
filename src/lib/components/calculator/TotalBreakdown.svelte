@@ -29,18 +29,14 @@
 	<h2 class="mb-4 text-lg font-semibold text-gray-900">Cost Breakdown</h2>
 
 	<!-- Summary Stats -->
-	<div class="mb-6 grid gap-4 sm:grid-cols-3">
-		<div class="rounded-lg bg-gray-50 p-4">
+	<div class="mb-6 space-y-3">
+		<div class="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
 			<p class="text-sm text-gray-500">Flight Time</p>
 			<p class="text-xl font-semibold text-gray-900">{formatHours($totalFlightTime)}</p>
 		</div>
-		<div class="rounded-lg bg-gray-50 p-4">
+		<div class="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3">
 			<p class="text-sm text-gray-500">Fuel (gallons)</p>
-			<p class="text-xl font-semibold text-gray-900">{$costBreakdown.fuelGallons.toLocaleString()}</p>
-		</div>
-		<div class="rounded-lg bg-gray-50 p-4">
-			<p class="text-sm text-gray-600">Total Estimate</p>
-			<p class="text-2xl font-bold text-gray-900">{formatCurrency($costBreakdown.total)}</p>
+			<p class="text-xl font-semibold text-gray-900">{Math.round($costBreakdown.fuelGallons).toLocaleString()}</p>
 		</div>
 	</div>
 
