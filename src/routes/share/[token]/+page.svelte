@@ -79,6 +79,11 @@
 		return `${h}h ${m}m`;
 	}
 
+	function formatGallons(fuelBurnLbs: number): string {
+		const gallons = Math.round(fuelBurnLbs / 6.7);
+		return `${gallons.toLocaleString()} gal`;
+	}
+
 	function handleDownloadPdf() {
 		if (!shareData) return;
 		downloadPDF(shareData.estimate.name, shareData.estimate.estimate_data);
@@ -183,22 +188,24 @@
 				<h2 class="mb-4 text-lg font-semibold text-gray-900">Flight Itinerary</h2>
 				<div class="space-y-3">
 					{#each data.legs as leg, i}
-						<div class="flex items-center gap-4 rounded-lg bg-gray-50 p-4">
+						<div class="flex items-start gap-4 rounded-lg bg-gray-50 p-4 sm:items-center">
 							<div
 								class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-sm font-medium text-red-700"
 							>
 								{i + 1}
 							</div>
-							<div class="flex-1">
-								<div class="flex items-center gap-2 font-medium text-gray-900">
+							<div class="flex flex-1 flex-col gap-1 sm:flex-row sm:items-center sm:gap-6">
+								<div class="flex items-center gap-2 font-medium text-gray-900 sm:min-w-35">
 									<span>{leg.origin || '???'}</span>
 									<svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
 									</svg>
 									<span>{leg.destination || '???'}</span>
 								</div>
-								<div class="mt-1 text-sm text-gray-500">
-									{formatHours(leg.flightTimeHours + leg.flightTimeMinutes / 60)} flight time
+								<div class="flex items-center gap-3 text-sm text-gray-500">
+									<span>{formatHours(leg.flightTimeHours + leg.flightTimeMinutes / 60)}</span>
+									<span class="text-gray-300">|</span>
+									<span>{formatGallons(leg.fuelBurnLbs)}</span>
 								</div>
 							</div>
 						</div>
