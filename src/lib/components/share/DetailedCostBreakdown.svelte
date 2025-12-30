@@ -184,7 +184,7 @@
 
 	<!-- Crew Costs -->
 	{#if calculations.crew.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Crew Costs</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -213,7 +213,7 @@
 
 	<!-- Hourly Programs & Reserves -->
 	{#if calculations.hourly.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Hourly Programs & Reserves</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -238,7 +238,7 @@
 
 	<!-- Fuel -->
 	{#if calculations.fuel.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Fuel</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -262,7 +262,7 @@
 
 	<!-- Airport & Ground -->
 	{#if calculations.airport.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Airport & Ground</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -293,7 +293,7 @@
 
 	<!-- Miscellaneous -->
 	{#if calculations.misc.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Miscellaneous</h3>
 				<span class="text-lg font-bold text-gray-900"
