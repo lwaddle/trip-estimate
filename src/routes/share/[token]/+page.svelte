@@ -5,7 +5,6 @@
 	import { Button } from '$lib/components/ui';
 	import { DetailedCostBreakdown } from '$lib/components/share';
 	import { downloadPDF } from '$lib/utils/pdf';
-	import logoLight from '$lib/assets/logo-light.svg';
 	import type { EstimateData } from '$lib/types/database';
 
 	interface ShareData {
@@ -170,14 +169,6 @@
 		{@const estimate = shareData.estimate}
 		{@const data = estimate.estimate_data}
 
-		<!-- Header with Logo -->
-		<header class="border-b border-gray-200 bg-white">
-			<div class="mx-auto flex h-16 max-w-4xl items-center justify-between px-4 sm:px-6 lg:px-8">
-				<img src={logoLight} alt="JLW Aviation" class="h-10" />
-				<span class="text-sm text-gray-500">Trip Estimate</span>
-			</div>
-		</header>
-
 		<main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 			<!-- Estimate Header -->
 			<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
@@ -214,43 +205,6 @@
 					{/each}
 				</div>
 			</div>
-
-			<!-- Crew Summary -->
-			{#if data.crew.length > 0}
-				{@const pilots = data.crew.filter((m) => m.role === 'pilot').length}
-				{@const attendants = data.crew.filter((m) => m.role === 'attendant').length}
-				<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
-					<h2 class="mb-4 text-lg font-semibold text-gray-900">Crew</h2>
-					<div class="flex gap-6">
-						{#if pilots > 0}
-							<div class="flex items-center gap-2">
-								<div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-									<svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-									</svg>
-								</div>
-								<div>
-									<p class="font-medium text-gray-900">{pilots}</p>
-									<p class="text-sm text-gray-500">{pilots === 1 ? 'Pilot' : 'Pilots'}</p>
-								</div>
-							</div>
-						{/if}
-						{#if attendants > 0}
-							<div class="flex items-center gap-2">
-								<div class="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
-									<svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-									</svg>
-								</div>
-								<div>
-									<p class="font-medium text-gray-900">{attendants}</p>
-									<p class="text-sm text-gray-500">{attendants === 1 ? 'Flight Attendant' : 'Flight Attendants'}</p>
-								</div>
-							</div>
-						{/if}
-					</div>
-				</div>
-			{/if}
 
 			<!-- Notes -->
 			{#if data.notes}
