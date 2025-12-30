@@ -4,10 +4,44 @@ html {
   scrollbar-gutter: stable;
 }
 
-/* Leader line for label-value pairs */
-.leader-line {
+/* Line item with stacked layout on mobile */
+.line-item {
   display: flex;
   align-items: baseline;
+}
+
+.line-item-label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.line-item-detail {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7280; /* gray-500 */
+  margin-top: 0.125rem;
+}
+
+/* On larger screens, show detail inline with label */
+@media (min-width: 640px) {
+  .line-item-label {
+    flex-direction: row;
+    align-items: baseline;
+  }
+
+  .line-item-detail {
+    margin-top: 0;
+    margin-left: 0.25rem;
+  }
+
+  .line-item-detail::before {
+    content: '(';
+  }
+
+  .line-item-detail::after {
+    content: ')';
+  }
 }
 
 .leader-dots {
