@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { calculator, isAuthenticated, ui, profiles, selectedProfile } from '$lib/stores';
+	import { untrack } from 'svelte';
+	import { calculator, isAuthenticated, ui, profiles, selectedProfile, defaultProfile } from '$lib/stores';
 	import { Button, ConfirmDialog } from '$lib/components/ui';
 	import {
 		FlightLegs,
@@ -10,6 +11,34 @@
 	} from '$lib/components/calculator';
 
 	let showResetConfirm = $state(false);
+
+	// Track if initial profile has been applied for this "session"
+	let initialProfileApplied = $state(false);
+
+	// Apply default profile on initial load for new estimates
+	$effect(() => {
+		const profile = $defaultProfile;
+		const profilesLoaded = !$profiles.loading;
+
+		// Use untrack to read savedId without creating a reactive dependency
+		// This prevents infinite loops since applyProfileDefaults updates the calculator store
+		const savedId = untrack(() => $calculator.savedId);
+
+		// Only apply on initial load for new estimates after profiles are loaded
+		if (!initialProfileApplied && savedId === null && profilesLoaded && profile) {
+			profiles.select(profile.id);
+			calculator.setProfile(profile.id);
+			calculator.applyProfileDefaults(profile.defaults);
+			initialProfileApplied = true;
+		}
+	});
+
+	// When loading a saved estimate, mark as applied so we don't override saved values
+	$effect(() => {
+		if ($calculator.savedId !== null) {
+			initialProfileApplied = true;
+		}
+	});
 
 	function handleSave() {
 		if (!$isAuthenticated) {
@@ -41,11 +70,13 @@
 			return;
 		}
 		calculator.reset();
+		initialProfileApplied = false; // Allow default profile to be re-applied
 		ui.showToast('Calculator reset', 'info');
 	}
 
 	function confirmReset() {
 		calculator.reset();
+		initialProfileApplied = false; // Allow default profile to be re-applied
 		ui.showToast('Calculator reset', 'info');
 		showResetConfirm = false;
 	}
