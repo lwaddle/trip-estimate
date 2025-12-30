@@ -169,7 +169,7 @@
 
 <div class="space-y-6">
 	<!-- Summary Stats -->
-	<div class="grid gap-4 sm:grid-cols-3">
+	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="rounded-lg bg-gray-50 p-4 text-center">
 			<p class="text-sm text-gray-500">Total Flight Time</p>
 			<p class="text-xl font-semibold text-gray-900">{formatHours(calculations.totalFlightTime)}</p>
@@ -180,15 +180,11 @@
 				{Math.round(calculations.totalFuelGallons).toLocaleString()} gal
 			</p>
 		</div>
-		<div class="rounded-lg bg-red-50 p-4 text-center">
-			<p class="text-sm text-gray-600">Total Estimate</p>
-			<p class="text-2xl font-bold text-gray-900">{formatCurrency(calculations.grandTotal)}</p>
-		</div>
 	</div>
 
 	<!-- Crew Costs -->
 	{#if calculations.crew.total > 0}
-		<div class="rounded-lg border-l-4 border-green-500 bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Crew Costs</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -216,7 +212,7 @@
 
 	<!-- Hourly Programs & Reserves -->
 	{#if calculations.hourly.total > 0}
-		<div class="rounded-lg border-l-4 border-red-500 bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Hourly Programs & Reserves</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -240,9 +236,7 @@
 
 	<!-- Fuel -->
 	{#if calculations.fuel.total > 0}
-		<div
-			class="rounded-lg border-l-4 border-yellow-500 bg-white p-4 shadow-sm ring-1 ring-gray-200"
-		>
+		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Fuel</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -265,9 +259,7 @@
 
 	<!-- Airport & Ground -->
 	{#if calculations.airport.total > 0}
-		<div
-			class="rounded-lg border-l-4 border-purple-500 bg-white p-4 shadow-sm ring-1 ring-gray-200"
-		>
+		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Airport & Ground</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -297,7 +289,7 @@
 
 	<!-- Miscellaneous -->
 	{#if calculations.misc.total > 0}
-		<div class="rounded-lg border-l-4 border-gray-500 bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Miscellaneous</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -319,10 +311,10 @@
 	{/if}
 
 	<!-- Grand Total -->
-	<div class="rounded-xl bg-gray-900 p-6 text-white">
+	<div class="rounded-xl bg-gray-100 p-6">
 		<div class="flex items-center justify-between">
-			<span class="text-lg font-semibold">Total Estimate</span>
-			<span class="text-3xl font-bold">{formatCurrency(calculations.grandTotal)}</span>
+			<span class="text-lg font-semibold text-gray-900">Total Estimate</span>
+			<span class="text-3xl font-bold text-gray-900">{formatCurrency(calculations.grandTotal)}</span>
 		</div>
 	</div>
 </div>
