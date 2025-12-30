@@ -29,6 +29,7 @@
 			profiles.select(profile.id);
 			calculator.setProfile(profile.id);
 			calculator.applyProfileDefaults(profile.defaults);
+			calculator.clearUnsavedChanges(); // Don't show "unsaved changes" for initial profile
 			initialProfileApplied = true;
 		}
 	});
