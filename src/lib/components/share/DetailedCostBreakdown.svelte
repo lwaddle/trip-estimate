@@ -22,6 +22,19 @@
 		return `${h}h ${m}m`;
 	}
 
+	function formatDecimalHours(hours: number): string {
+		return `${hours.toFixed(1)} hrs`;
+	}
+
+	function formatRate(value: number): string {
+		return new Intl.NumberFormat('en-US', {
+			style: 'currency',
+			currency: 'USD',
+			minimumFractionDigits: value < 100 ? 2 : 0,
+			maximumFractionDigits: value < 100 ? 2 : 0
+		}).format(value);
+	}
+
 	// Calculate all derived values
 	const calculations = $derived.by(() => {
 		const { costs, crew, legs } = data;
@@ -140,6 +153,7 @@
 
 	interface LineItem {
 		label: string;
+		detail?: string; // Rate breakdown shown on second line on mobile
 		value: number;
 		show?: boolean;
 	}
@@ -184,7 +198,7 @@
 
 	<!-- Crew Costs -->
 	{#if calculations.crew.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Crew Costs</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -193,16 +207,21 @@
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
-					{ label: `Daily rates (${data.costs.crew.numberOfDays} days)`, value: calculations.crew.dailyRates },
-					{ label: `Hotel (${data.costs.crew.numberOfNights} nights × ${calculations.crewCount} crew)`, value: calculations.crew.hotel },
-					{ label: `Meals (${data.costs.crew.numberOfDays} days × ${calculations.crewCount} crew)`, value: calculations.crew.meals },
-					{ label: `Per-person expenses (${calculations.crewCount} crew)`, value: calculations.crew.perPerson },
+					{ label: 'Daily rates', detail: `${data.costs.crew.numberOfDays} days @ ${formatRate(data.crew.reduce((sum, m) => sum + m.dailyRate, 0))}/day`, value: calculations.crew.dailyRates },
+					{ label: 'Hotel', detail: `${data.costs.crew.numberOfNights} nights × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.hotelPerNight)}/night`, value: calculations.crew.hotel },
+					{ label: 'Meals', detail: `${data.costs.crew.numberOfDays} days × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.mealsPerDay)}/day`, value: calculations.crew.meals },
+					{ label: 'Per-person expenses', detail: `${calculations.crewCount} crew @ ${formatRate(data.costs.crew.perPersonExpenses)}/person`, value: calculations.crew.perPerson },
 					{ label: 'Rental car', value: calculations.crew.rentalCar },
 					{ label: 'Airfare', value: calculations.crew.airfare },
 					{ label: 'Mileage', value: calculations.crew.mileage }
 				]) as item}
-					<div class="leader-line">
-						<span class="text-gray-600">{item.label}</span>
+					<div class="line-item">
+						<div class="line-item-label">
+							<span class="text-gray-600">{item.label}</span>
+							{#if item.detail}
+								<span class="line-item-detail">{item.detail}</span>
+							{/if}
+						</div>
 						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
@@ -213,7 +232,7 @@
 
 	<!-- Hourly Programs & Reserves -->
 	{#if calculations.hourly.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Hourly Programs & Reserves</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -222,12 +241,17 @@
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
-					{ label: `Maintenance program (${formatHours(calculations.totalFlightTime)})`, value: calculations.hourly.maintenance },
-					{ label: `Consumables (${formatHours(calculations.totalFlightTime)})`, value: calculations.hourly.consumables },
-					{ label: `Additional reserve (${formatHours(calculations.totalFlightTime)})`, value: calculations.hourly.reserve }
+					{ label: 'Maintenance', detail: `${formatDecimalHours(calculations.totalFlightTime)} @ ${formatRate(data.costs.hourly.maintenanceProgram)}/hr`, value: calculations.hourly.maintenance },
+					{ label: 'Consumables', detail: `${formatDecimalHours(calculations.totalFlightTime)} @ ${formatRate(data.costs.hourly.consumables)}/hr`, value: calculations.hourly.consumables },
+					{ label: 'Additional reserve', detail: `${formatDecimalHours(calculations.totalFlightTime)} @ ${formatRate(data.costs.hourly.additionalReserve)}/hr`, value: calculations.hourly.reserve }
 				]) as item}
-					<div class="leader-line">
-						<span class="text-gray-600">{item.label}</span>
+					<div class="line-item">
+						<div class="line-item-label">
+							<span class="text-gray-600">{item.label}</span>
+							{#if item.detail}
+								<span class="line-item-detail">{item.detail}</span>
+							{/if}
+						</div>
 						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
@@ -238,7 +262,7 @@
 
 	<!-- Fuel -->
 	{#if calculations.fuel.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Fuel</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -247,11 +271,16 @@
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
-					{ label: `Flight fuel (${Math.round(calculations.fuel.gallons).toLocaleString()} gal @ $${data.costs.fuel.pricePerGallon}/gal)`, value: calculations.fuel.burnCost },
-					{ label: `APU (${Math.round(calculations.fuel.apuGallons).toLocaleString()} gal)`, value: calculations.fuel.apuCost }
+					{ label: 'Flight fuel', detail: `${Math.round(calculations.fuel.gallons).toLocaleString()} gal @ ${formatRate(data.costs.fuel.pricePerGallon)}/gal`, value: calculations.fuel.burnCost },
+					{ label: 'APU', detail: `${Math.round(calculations.fuel.apuGallons).toLocaleString()} gal @ ${formatRate(data.costs.fuel.pricePerGallon)}/gal`, value: calculations.fuel.apuCost }
 				]) as item}
-					<div class="leader-line">
-						<span class="text-gray-600">{item.label}</span>
+					<div class="line-item">
+						<div class="line-item-label">
+							<span class="text-gray-600">{item.label}</span>
+							{#if item.detail}
+								<span class="line-item-detail">{item.detail}</span>
+							{/if}
+						</div>
 						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
@@ -262,7 +291,7 @@
 
 	<!-- Airport & Ground -->
 	{#if calculations.airport.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Airport & Ground</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -281,8 +310,13 @@
 					{ label: 'Customs', value: calculations.airport.customs },
 					{ label: 'Hangar', value: calculations.airport.hangar }
 				]) as item}
-					<div class="leader-line">
-						<span class="text-gray-600">{item.label}</span>
+					<div class="line-item">
+						<div class="line-item-label">
+							<span class="text-gray-600">{item.label}</span>
+							{#if item.detail}
+								<span class="line-item-detail">{item.detail}</span>
+							{/if}
+						</div>
 						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
@@ -293,7 +327,7 @@
 
 	<!-- Miscellaneous -->
 	{#if calculations.misc.total > 0}
-		<div class="rounded-lg bg-white p-4 shadow-sm ring-1 ring-gray-200">
+		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
 			<div class="mb-3 flex items-center justify-between">
 				<h3 class="font-semibold text-gray-900">Miscellaneous</h3>
 				<span class="text-lg font-bold text-gray-900"
@@ -305,8 +339,13 @@
 					{ label: 'Trip coordination', value: calculations.misc.tripCoordination },
 					{ label: 'Other', value: calculations.misc.other }
 				]) as item}
-					<div class="leader-line">
-						<span class="text-gray-600">{item.label}</span>
+					<div class="line-item">
+						<div class="line-item-label">
+							<span class="text-gray-600">{item.label}</span>
+							{#if item.detail}
+								<span class="line-item-detail">{item.detail}</span>
+							{/if}
+						</div>
 						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
