@@ -201,9 +201,10 @@
 					{ label: 'Airfare', value: calculations.crew.airfare },
 					{ label: 'Mileage', value: calculations.crew.mileage }
 				]) as item}
-					<div class="flex justify-between">
+					<div class="leader-line">
 						<span class="text-gray-600">{item.label}</span>
-						<span class="font-medium text-gray-900">{formatCurrency(item.value)}</span>
+						<span class="leader-dots"></span>
+						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 			</div>
@@ -225,9 +226,10 @@
 					{ label: `Consumables (${formatHours(calculations.totalFlightTime)})`, value: calculations.hourly.consumables },
 					{ label: `Additional reserve (${formatHours(calculations.totalFlightTime)})`, value: calculations.hourly.reserve }
 				]) as item}
-					<div class="flex justify-between">
+					<div class="leader-line">
 						<span class="text-gray-600">{item.label}</span>
-						<span class="font-medium text-gray-900">{formatCurrency(item.value)}</span>
+						<span class="leader-dots"></span>
+						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 			</div>
@@ -248,9 +250,10 @@
 					{ label: `Flight fuel (${Math.round(calculations.fuel.gallons).toLocaleString()} gal @ $${data.costs.fuel.pricePerGallon}/gal)`, value: calculations.fuel.burnCost },
 					{ label: `APU (${Math.round(calculations.fuel.apuGallons).toLocaleString()} gal)`, value: calculations.fuel.apuCost }
 				]) as item}
-					<div class="flex justify-between">
+					<div class="leader-line">
 						<span class="text-gray-600">{item.label}</span>
-						<span class="font-medium text-gray-900">{formatCurrency(item.value)}</span>
+						<span class="leader-dots"></span>
+						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 			</div>
@@ -278,9 +281,10 @@
 					{ label: 'Customs', value: calculations.airport.customs },
 					{ label: 'Hangar', value: calculations.airport.hangar }
 				]) as item}
-					<div class="flex justify-between">
+					<div class="leader-line">
 						<span class="text-gray-600">{item.label}</span>
-						<span class="font-medium text-gray-900">{formatCurrency(item.value)}</span>
+						<span class="leader-dots"></span>
+						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 			</div>
@@ -301,9 +305,10 @@
 					{ label: 'Trip coordination', value: calculations.misc.tripCoordination },
 					{ label: 'Other', value: calculations.misc.other }
 				]) as item}
-					<div class="flex justify-between">
+					<div class="leader-line">
 						<span class="text-gray-600">{item.label}</span>
-						<span class="font-medium text-gray-900">{formatCurrency(item.value)}</span>
+						<span class="leader-dots"></span>
+						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 			</div>
