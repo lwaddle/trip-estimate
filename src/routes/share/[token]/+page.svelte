@@ -65,12 +65,17 @@
 		}
 	});
 
-	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
+	function formatDateTime(dateStr: string): string {
+		const date = new Date(dateStr);
+		const dateFormatted = date.toLocaleDateString('en-US', {
 			month: 'long',
 			day: 'numeric',
-			year: 'numeric'
+			year: 'numeric',
+			timeZone: 'UTC'
 		});
+		const hours = date.getUTCHours().toString().padStart(2, '0');
+		const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+		return `${dateFormatted} ${hours}:${minutes} UTC`;
 	}
 
 	function formatHours(hours: number): string {
@@ -179,7 +184,7 @@
 			<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
 				<h1 class="text-2xl font-bold text-gray-900">{estimate.name}</h1>
 				<p class="mt-1 text-sm text-gray-500">
-					Prepared {formatDate(estimate.updated_at)}
+					Prepared {formatDateTime(estimate.updated_at)}{estimate.creator_email ? ` by ${estimate.creator_email}` : ''}
 				</p>
 			</div>
 
