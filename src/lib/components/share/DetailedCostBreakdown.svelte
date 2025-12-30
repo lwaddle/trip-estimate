@@ -169,7 +169,7 @@
 
 <div class="space-y-6">
 	<!-- Summary Stats -->
-	<div class="grid gap-4 sm:grid-cols-3">
+	<div class="grid gap-4 sm:grid-cols-2">
 		<div class="rounded-lg bg-gray-50 p-4 text-center">
 			<p class="text-sm text-gray-500">Total Flight Time</p>
 			<p class="text-xl font-semibold text-gray-900">{formatHours(calculations.totalFlightTime)}</p>
@@ -179,10 +179,6 @@
 			<p class="text-xl font-semibold text-gray-900">
 				{Math.round(calculations.totalFuelGallons).toLocaleString()} gal
 			</p>
-		</div>
-		<div class="rounded-lg bg-red-50 p-4 text-center">
-			<p class="text-sm text-gray-600">Total Estimate</p>
-			<p class="text-2xl font-bold text-gray-900">{formatCurrency(calculations.grandTotal)}</p>
 		</div>
 	</div>
 
