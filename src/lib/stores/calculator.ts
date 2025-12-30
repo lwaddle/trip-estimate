@@ -260,6 +260,10 @@ function createCalculatorStore() {
 			});
 		},
 
+		clearUnsavedChanges: () => {
+			update((state) => ({ ...state, hasUnsavedChanges: false }));
+		},
+
 		// Apply profile defaults
 		applyProfileDefaults: (defaults: {
 			fuelPrice?: number;

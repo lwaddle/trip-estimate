@@ -8,7 +8,8 @@
       "Bash(npm run build:*)",
       "Bash(cat:*)",
       "Bash(grep:*)",
-      "Bash(xargs:*)"
+      "Bash(xargs:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
