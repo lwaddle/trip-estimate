@@ -3,3 +3,16 @@
 html {
   scrollbar-gutter: stable;
 }
+
+/* Leader line for label-value pairs */
+.leader-line {
+  display: flex;
+  align-items: baseline;
+}
+
+.leader-dots {
+  flex: 1;
+  border-bottom: 1px dotted #9ca3af; /* gray-400 */
+  margin: 0 0.5rem;
+  min-width: 1rem;
+}
