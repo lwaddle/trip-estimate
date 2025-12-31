@@ -358,7 +358,7 @@
 	<div class="rounded-xl bg-gray-100 p-6">
 		<div class="flex items-center justify-between">
 			<span class="text-lg font-semibold text-gray-900">Total Estimate</span>
-			<span class="text-3xl font-bold text-gray-900">{formatCurrency(calculations.grandTotal)}</span>
+			<span class="text-xl font-bold text-gray-900">{formatCurrency(calculations.grandTotal)}</span>
 		</div>
 	</div>
 </div>
