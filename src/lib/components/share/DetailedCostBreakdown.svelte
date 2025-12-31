@@ -219,13 +219,11 @@
 								<span class="line-item-detail">{item.detail}</span>
 							{/if}
 						</div>
-						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 				<div class="line-item mt-2">
 					<span class="font-semibold text-gray-900">Subtotal</span>
-					<span class="leader-dots"></span>
 					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.crew.total)}</span>
 				</div>
 			</div>
@@ -251,13 +249,11 @@
 								<span class="line-item-detail">{item.detail}</span>
 							{/if}
 						</div>
-						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 				<div class="line-item mt-2">
 					<span class="font-semibold text-gray-900">Subtotal</span>
-					<span class="leader-dots"></span>
 					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.hourly.total)}</span>
 				</div>
 			</div>
@@ -282,13 +278,11 @@
 								<span class="line-item-detail">{item.detail}</span>
 							{/if}
 						</div>
-						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 				<div class="line-item mt-2">
 					<span class="font-semibold text-gray-900">Subtotal</span>
-					<span class="leader-dots"></span>
 					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.fuel.total)}</span>
 				</div>
 			</div>
@@ -320,13 +314,11 @@
 								<span class="line-item-detail">{item.detail}</span>
 							{/if}
 						</div>
-						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 				<div class="line-item mt-2">
 					<span class="font-semibold text-gray-900">Subtotal</span>
-					<span class="leader-dots"></span>
 					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.airport.total)}</span>
 				</div>
 			</div>
@@ -351,13 +343,11 @@
 								<span class="line-item-detail">{item.detail}</span>
 							{/if}
 						</div>
-						<span class="leader-dots"></span>
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
 				<div class="line-item mt-2">
 					<span class="font-semibold text-gray-900">Subtotal</span>
-					<span class="leader-dots"></span>
 					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.misc.total)}</span>
 				</div>
 			</div>
