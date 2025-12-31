@@ -181,7 +181,7 @@
 
 		<main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 			<!-- Estimate Header -->
-			<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+			<div class="mb-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-6">
 				<h1 class="text-2xl font-bold text-gray-900">{estimate.name}</h1>
 				<p class="mt-1 text-sm text-gray-500">
 					Prepared {formatDateTime(estimate.updated_at)}{estimate.creator_email ? ` by ${estimate.creator_email}` : ''}
@@ -189,7 +189,7 @@
 			</div>
 
 			<!-- Flight Legs -->
-			<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+			<div class="mb-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-6">
 				<h2 class="mb-4 text-lg font-semibold text-gray-900">Flight Itinerary</h2>
 				<div class="space-y-3">
 					{#each data.legs as leg, i}
@@ -220,14 +220,14 @@
 
 			<!-- Notes -->
 			{#if data.notes}
-				<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+				<div class="mb-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-6">
 					<h2 class="mb-4 text-lg font-semibold text-gray-900">Notes</h2>
 					<p class="whitespace-pre-wrap text-gray-600">{data.notes}</p>
 				</div>
 			{/if}
 
 			<!-- Cost Breakdown -->
-			<div class="mb-8 rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+			<div class="mb-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-6">
 				<h2 class="mb-6 text-lg font-semibold text-gray-900">Cost Breakdown</h2>
 				<DetailedCostBreakdown {data} />
 			</div>
