@@ -199,11 +199,8 @@
 	<!-- Crew Costs -->
 	{#if calculations.crew.total > 0}
 		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
-			<div class="mb-3 flex items-center justify-between">
+			<div class="mb-3">
 				<h3 class="font-semibold text-gray-900">Crew Costs</h3>
-				<span class="text-lg font-bold text-gray-900"
-					>{formatCurrency(calculations.crew.total)}</span
-				>
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
@@ -226,6 +223,11 @@
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
+				<div class="line-item mt-2">
+					<span class="font-semibold text-gray-900">Subtotal</span>
+					<span class="leader-dots"></span>
+					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.crew.total)}</span>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -233,11 +235,8 @@
 	<!-- Hourly Programs & Reserves -->
 	{#if calculations.hourly.total > 0}
 		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
-			<div class="mb-3 flex items-center justify-between">
+			<div class="mb-3">
 				<h3 class="font-semibold text-gray-900">Hourly Programs & Reserves</h3>
-				<span class="text-lg font-bold text-gray-900"
-					>{formatCurrency(calculations.hourly.total)}</span
-				>
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
@@ -256,6 +255,11 @@
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
+				<div class="line-item mt-2">
+					<span class="font-semibold text-gray-900">Subtotal</span>
+					<span class="leader-dots"></span>
+					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.hourly.total)}</span>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -263,11 +267,8 @@
 	<!-- Fuel -->
 	{#if calculations.fuel.total > 0}
 		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
-			<div class="mb-3 flex items-center justify-between">
+			<div class="mb-3">
 				<h3 class="font-semibold text-gray-900">Fuel</h3>
-				<span class="text-lg font-bold text-gray-900"
-					>{formatCurrency(calculations.fuel.total)}</span
-				>
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
@@ -285,6 +286,11 @@
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
+				<div class="line-item mt-2">
+					<span class="font-semibold text-gray-900">Subtotal</span>
+					<span class="leader-dots"></span>
+					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.fuel.total)}</span>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -292,11 +298,8 @@
 	<!-- Airport & Ground -->
 	{#if calculations.airport.total > 0}
 		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
-			<div class="mb-3 flex items-center justify-between">
+			<div class="mb-3">
 				<h3 class="font-semibold text-gray-900">Airport & Ground</h3>
-				<span class="text-lg font-bold text-gray-900"
-					>{formatCurrency(calculations.airport.total)}</span
-				>
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
@@ -321,6 +324,11 @@
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
+				<div class="line-item mt-2">
+					<span class="font-semibold text-gray-900">Subtotal</span>
+					<span class="leader-dots"></span>
+					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.airport.total)}</span>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -328,11 +336,8 @@
 	<!-- Miscellaneous -->
 	{#if calculations.misc.total > 0}
 		<div class="rounded-lg bg-white p-3 shadow-sm ring-1 ring-gray-200 sm:p-4">
-			<div class="mb-3 flex items-center justify-between">
+			<div class="mb-3">
 				<h3 class="font-semibold text-gray-900">Miscellaneous</h3>
-				<span class="text-lg font-bold text-gray-900"
-					>{formatCurrency(calculations.misc.total)}</span
-				>
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
@@ -350,6 +355,11 @@
 						<span class="whitespace-nowrap font-medium text-gray-900">{formatCurrency(item.value)}</span>
 					</div>
 				{/each}
+				<div class="line-item mt-2">
+					<span class="font-semibold text-gray-900">Subtotal</span>
+					<span class="leader-dots"></span>
+					<span class="whitespace-nowrap font-bold text-gray-900">{formatCurrency(calculations.misc.total)}</span>
+				</div>
 			</div>
 		</div>
 	{/if}
