@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import type { EstimateData, FlightLeg, CrewMember, CostCategory } from '$lib/types/database';
+import logoUrl from '$lib/assets/logo-light.png';
 
 interface DetailedCostBreakdown {
 	totalFlightTime: number;
@@ -197,17 +198,12 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 
 	const costs = calculateDetailedCosts(data);
 
-	// Header
-	doc.setFontSize(20);
-	doc.setFont('helvetica', 'bold');
-	doc.text('JLW Aviation', margin, y);
-	y += 8;
-
-	doc.setFontSize(12);
-	doc.setTextColor(100);
-	doc.text('Trip Estimate', margin, y);
-	doc.setTextColor(0);
-	y += 12;
+	// Header with logo
+	// Logo dimensions: 400x191 pixels (roughly 2:1 ratio), scale to ~50mm wide
+	const logoWidth = 50;
+	const logoHeight = 24;
+	doc.addImage(logoUrl, 'PNG', margin, y - 5, logoWidth, logoHeight);
+	y += logoHeight + 2;
 
 	doc.setFontSize(16);
 	doc.setFont('helvetica', 'bold');
@@ -252,7 +248,7 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 
 	data.legs.forEach((leg, i) => {
 		y = checkPageBreak(doc, y, margin, 10);
-		const route = `${leg.origin || '???'} → ${leg.destination || '???'}`;
+		const route = `${leg.origin || '???'} > ${leg.destination || '???'}`;
 		const time = formatHours(leg.flightTimeHours + leg.flightTimeMinutes / 60);
 
 		doc.text(`Leg ${i + 1}: ${route}`, margin, y);
@@ -288,11 +284,9 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// Crew Costs
 	if (costs.crew.total > 0) {
 		y = checkPageBreak(doc, y, margin, 60);
-		doc.setFillColor(34, 197, 94); // Green
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Crew Costs', margin + 6, y);
+		doc.text('Crew Costs', margin, y);
 		doc.text(formatCurrency(costs.crew.total), pageWidth - margin - 30, y, { align: 'right' });
 		y += 7;
 
@@ -311,11 +305,9 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// Hourly Programs & Reserves
 	if (costs.hourly.total > 0) {
 		y = checkPageBreak(doc, y, margin, 30);
-		doc.setFillColor(239, 68, 68); // Red
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Hourly Programs & Reserves', margin + 6, y);
+		doc.text('Hourly Programs & Reserves', margin, y);
 		doc.text(formatCurrency(costs.hourly.total), pageWidth - margin - 30, y, { align: 'right' });
 		y += 7;
 
@@ -330,11 +322,9 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// Fuel
 	if (costs.fuel.total > 0) {
 		y = checkPageBreak(doc, y, margin, 25);
-		doc.setFillColor(234, 179, 8); // Yellow
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Fuel', margin + 6, y);
+		doc.text('Fuel', margin, y);
 		doc.text(formatCurrency(costs.fuel.total), pageWidth - margin - 30, y, { align: 'right' });
 		y += 7;
 
@@ -348,11 +338,9 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// Airport & Ground
 	if (costs.airport.total > 0) {
 		y = checkPageBreak(doc, y, margin, 60);
-		doc.setFillColor(168, 85, 247); // Purple
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Airport & Ground', margin + 6, y);
+		doc.text('Airport & Ground', margin, y);
 		doc.text(formatCurrency(costs.airport.total), pageWidth - margin - 30, y, { align: 'right' });
 		y += 7;
 
@@ -373,11 +361,9 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// Miscellaneous
 	if (costs.misc.total > 0) {
 		y = checkPageBreak(doc, y, margin, 25);
-		doc.setFillColor(107, 114, 128); // Gray
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Miscellaneous', margin + 6, y);
+		doc.text('Miscellaneous', margin, y);
 		doc.text(formatCurrency(costs.misc.total), pageWidth - margin - 30, y, { align: 'right' });
 		y += 7;
 
