@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import type { EstimateData, FlightLeg, CrewMember, CostCategory } from '$lib/types/database';
+import logoUrl from '$lib/assets/logo-light.png';
 
 interface DetailedCostBreakdown {
 	totalFlightTime: number;
@@ -172,11 +173,17 @@ function addLineItem(
 	value: number,
 	margin: number,
 	y: number,
-	pageWidth: number
+	pageWidth: number,
+	rowCounter: { count: number }
 ): number {
 	if (value <= 0) return y;
+	if (rowCounter.count % 2 === 0) {
+		doc.setFillColor(245, 245, 245);
+		doc.rect(margin, y - 3.5, pageWidth - 2 * margin, 5, 'F');
+	}
+	rowCounter.count++;
 	doc.text(`  ${label}`, margin, y);
-	doc.text(formatCurrency(value), pageWidth - margin - 30, y, { align: 'right' });
+	doc.text(formatCurrency(value), pageWidth - margin, y, { align: 'right' });
 	return y + 5;
 }
 
@@ -197,17 +204,12 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 
 	const costs = calculateDetailedCosts(data);
 
-	// Header
-	doc.setFontSize(20);
-	doc.setFont('helvetica', 'bold');
-	doc.text('JLW Aviation', margin, y);
-	y += 8;
-
-	doc.setFontSize(12);
-	doc.setTextColor(100);
-	doc.text('Trip Estimate', margin, y);
-	doc.setTextColor(0);
-	y += 12;
+	// Header with logo
+	// Logo dimensions: 400x191 pixels (roughly 2:1 ratio), scale to ~50mm wide
+	const logoWidth = 24;
+	const logoHeight = 11;
+	doc.addImage(logoUrl, 'PNG', margin, y - 5, logoWidth, logoHeight);
+	y += logoHeight + 5;
 
 	doc.setFontSize(16);
 	doc.setFont('helvetica', 'bold');
@@ -252,11 +254,15 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 
 	data.legs.forEach((leg, i) => {
 		y = checkPageBreak(doc, y, margin, 10);
-		const route = `${leg.origin || '???'} → ${leg.destination || '???'}`;
+		if (i % 2 === 0) {
+			doc.setFillColor(245, 245, 245);
+			doc.rect(margin, y - 3.5, pageWidth - 2 * margin, 5, 'F');
+		}
+		const route = `${leg.origin || '???'}  -  ${leg.destination || '???'}`;
 		const time = formatHours(leg.flightTimeHours + leg.flightTimeMinutes / 60);
 
 		doc.text(`Leg ${i + 1}: ${route}`, margin, y);
-		doc.text(time, pageWidth - margin - 30, y, { align: 'right' });
+		doc.text(time, pageWidth - margin, y, { align: 'right' });
 		y += 5;
 	});
 
@@ -288,103 +294,113 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// Crew Costs
 	if (costs.crew.total > 0) {
 		y = checkPageBreak(doc, y, margin, 60);
-		doc.setFillColor(34, 197, 94); // Green
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Crew Costs', margin + 6, y);
-		doc.text(formatCurrency(costs.crew.total), pageWidth - margin - 30, y, { align: 'right' });
-		y += 7;
+		doc.text('Crew Costs', margin, y);
+		doc.text(formatCurrency(costs.crew.total), pageWidth - margin, y, { align: 'right' });
+		y += 2;
+		doc.setDrawColor(220);
+		doc.line(margin, y, pageWidth - margin, y);
+		y += 5;
 
 		doc.setFontSize(8);
 		doc.setFont('helvetica', 'normal');
-		y = addLineItem(doc, `Daily rates (${data.costs.crew.numberOfDays} days)`, costs.crew.dailyRates, margin, y, pageWidth);
-		y = addLineItem(doc, `Hotel (${data.costs.crew.numberOfNights} nights × ${costs.crewCount} crew)`, costs.crew.hotel, margin, y, pageWidth);
-		y = addLineItem(doc, `Meals (${data.costs.crew.numberOfDays} days × ${costs.crewCount} crew)`, costs.crew.meals, margin, y, pageWidth);
-		y = addLineItem(doc, `Per-person expenses (${costs.crewCount} crew)`, costs.crew.perPerson, margin, y, pageWidth);
-		y = addLineItem(doc, 'Rental car', costs.crew.rentalCar, margin, y, pageWidth);
-		y = addLineItem(doc, 'Airfare', costs.crew.airfare, margin, y, pageWidth);
-		y = addLineItem(doc, 'Mileage', costs.crew.mileage, margin, y, pageWidth);
+		const rc = { count: 0 };
+		y = addLineItem(doc, `Daily rates (${data.costs.crew.numberOfDays} days)`, costs.crew.dailyRates, margin, y, pageWidth, rc);
+		y = addLineItem(doc, `Hotel (${data.costs.crew.numberOfNights} nights × ${costs.crewCount} crew)`, costs.crew.hotel, margin, y, pageWidth, rc);
+		y = addLineItem(doc, `Meals (${data.costs.crew.numberOfDays} days × ${costs.crewCount} crew)`, costs.crew.meals, margin, y, pageWidth, rc);
+		y = addLineItem(doc, `Per-person expenses (${costs.crewCount} crew)`, costs.crew.perPerson, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Rental car', costs.crew.rentalCar, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Airfare', costs.crew.airfare, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Mileage', costs.crew.mileage, margin, y, pageWidth, rc);
 		y += 5;
 	}
 
 	// Hourly Programs & Reserves
 	if (costs.hourly.total > 0) {
 		y = checkPageBreak(doc, y, margin, 30);
-		doc.setFillColor(239, 68, 68); // Red
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Hourly Programs & Reserves', margin + 6, y);
-		doc.text(formatCurrency(costs.hourly.total), pageWidth - margin - 30, y, { align: 'right' });
-		y += 7;
+		doc.text('Hourly Programs & Reserves', margin, y);
+		doc.text(formatCurrency(costs.hourly.total), pageWidth - margin, y, { align: 'right' });
+		y += 2;
+		doc.setDrawColor(220);
+		doc.line(margin, y, pageWidth - margin, y);
+		y += 5;
 
 		doc.setFontSize(8);
 		doc.setFont('helvetica', 'normal');
-		y = addLineItem(doc, `Maintenance program (${formatHours(costs.totalFlightTime)})`, costs.hourly.maintenance, margin, y, pageWidth);
-		y = addLineItem(doc, `Consumables (${formatHours(costs.totalFlightTime)})`, costs.hourly.consumables, margin, y, pageWidth);
-		y = addLineItem(doc, `Additional reserve (${formatHours(costs.totalFlightTime)})`, costs.hourly.reserve, margin, y, pageWidth);
+		const rc = { count: 0 };
+		y = addLineItem(doc, `Maintenance program (${formatHours(costs.totalFlightTime)})`, costs.hourly.maintenance, margin, y, pageWidth, rc);
+		y = addLineItem(doc, `Consumables (${formatHours(costs.totalFlightTime)})`, costs.hourly.consumables, margin, y, pageWidth, rc);
+		y = addLineItem(doc, `Additional reserve (${formatHours(costs.totalFlightTime)})`, costs.hourly.reserve, margin, y, pageWidth, rc);
 		y += 5;
 	}
 
 	// Fuel
 	if (costs.fuel.total > 0) {
 		y = checkPageBreak(doc, y, margin, 25);
-		doc.setFillColor(234, 179, 8); // Yellow
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Fuel', margin + 6, y);
-		doc.text(formatCurrency(costs.fuel.total), pageWidth - margin - 30, y, { align: 'right' });
-		y += 7;
+		doc.text('Fuel', margin, y);
+		doc.text(formatCurrency(costs.fuel.total), pageWidth - margin, y, { align: 'right' });
+		y += 2;
+		doc.setDrawColor(220);
+		doc.line(margin, y, pageWidth - margin, y);
+		y += 5;
 
 		doc.setFontSize(8);
 		doc.setFont('helvetica', 'normal');
-		y = addLineItem(doc, `Flight fuel (${Math.round(costs.fuel.gallons).toLocaleString()} gal @ $${data.costs.fuel.pricePerGallon}/gal)`, costs.fuel.burnCost, margin, y, pageWidth);
-		y = addLineItem(doc, `APU (${Math.round(costs.fuel.apuGallons).toLocaleString()} gal)`, costs.fuel.apuCost, margin, y, pageWidth);
+		const rc = { count: 0 };
+		y = addLineItem(doc, `Flight fuel (${Math.round(costs.fuel.gallons).toLocaleString()} gal @ $${data.costs.fuel.pricePerGallon}/gal)`, costs.fuel.burnCost, margin, y, pageWidth, rc);
+		y = addLineItem(doc, `APU (${Math.round(costs.fuel.apuGallons).toLocaleString()} gal)`, costs.fuel.apuCost, margin, y, pageWidth, rc);
 		y += 5;
 	}
 
 	// Airport & Ground
 	if (costs.airport.total > 0) {
 		y = checkPageBreak(doc, y, margin, 60);
-		doc.setFillColor(168, 85, 247); // Purple
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Airport & Ground', margin + 6, y);
-		doc.text(formatCurrency(costs.airport.total), pageWidth - margin - 30, y, { align: 'right' });
-		y += 7;
+		doc.text('Airport & Ground', margin, y);
+		doc.text(formatCurrency(costs.airport.total), pageWidth - margin, y, { align: 'right' });
+		y += 2;
+		doc.setDrawColor(220);
+		doc.line(margin, y, pageWidth - margin, y);
+		y += 5;
 
 		doc.setFontSize(8);
 		doc.setFont('helvetica', 'normal');
-		y = addLineItem(doc, 'Landing fees', costs.airport.landingFees, margin, y, pageWidth);
-		y = addLineItem(doc, 'Catering', costs.airport.catering, margin, y, pageWidth);
-		y = addLineItem(doc, 'Ground handling', costs.airport.handling, margin, y, pageWidth);
-		y = addLineItem(doc, 'Passenger transport', costs.airport.passengerTransport, margin, y, pageWidth);
-		y = addLineItem(doc, 'Facility fees', costs.airport.facilityFees, margin, y, pageWidth);
-		y = addLineItem(doc, 'Special event fees', costs.airport.specialEventFees, margin, y, pageWidth);
-		y = addLineItem(doc, 'Ramp parking', costs.airport.rampParking, margin, y, pageWidth);
-		y = addLineItem(doc, 'Customs', costs.airport.customs, margin, y, pageWidth);
-		y = addLineItem(doc, 'Hangar', costs.airport.hangar, margin, y, pageWidth);
+		const rc = { count: 0 };
+		y = addLineItem(doc, 'Landing fees', costs.airport.landingFees, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Catering', costs.airport.catering, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Ground handling', costs.airport.handling, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Passenger transport', costs.airport.passengerTransport, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Facility fees', costs.airport.facilityFees, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Special event fees', costs.airport.specialEventFees, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Ramp parking', costs.airport.rampParking, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Customs', costs.airport.customs, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Hangar', costs.airport.hangar, margin, y, pageWidth, rc);
 		y += 5;
 	}
 
 	// Miscellaneous
 	if (costs.misc.total > 0) {
 		y = checkPageBreak(doc, y, margin, 25);
-		doc.setFillColor(107, 114, 128); // Gray
-		doc.rect(margin, y - 4, 3, 14, 'F');
 		doc.setFontSize(10);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Miscellaneous', margin + 6, y);
-		doc.text(formatCurrency(costs.misc.total), pageWidth - margin - 30, y, { align: 'right' });
-		y += 7;
+		doc.text('Miscellaneous', margin, y);
+		doc.text(formatCurrency(costs.misc.total), pageWidth - margin, y, { align: 'right' });
+		y += 2;
+		doc.setDrawColor(220);
+		doc.line(margin, y, pageWidth - margin, y);
+		y += 5;
 
 		doc.setFontSize(8);
 		doc.setFont('helvetica', 'normal');
-		y = addLineItem(doc, 'Trip coordination', costs.misc.tripCoordination, margin, y, pageWidth);
-		y = addLineItem(doc, 'Other', costs.misc.other, margin, y, pageWidth);
+		const rc = { count: 0 };
+		y = addLineItem(doc, 'Trip coordination', costs.misc.tripCoordination, margin, y, pageWidth, rc);
+		y = addLineItem(doc, 'Other', costs.misc.other, margin, y, pageWidth, rc);
 		y += 5;
 	}
 
@@ -398,7 +414,7 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	doc.setFontSize(12);
 	doc.setFont('helvetica', 'bold');
 	doc.text('Total Estimate', margin, y);
-	doc.text(formatCurrency(costs.grandTotal), pageWidth - margin - 30, y, { align: 'right' });
+	doc.text(formatCurrency(costs.grandTotal), pageWidth - margin, y, { align: 'right' });
 	y += 12;
 
 	// Notes
