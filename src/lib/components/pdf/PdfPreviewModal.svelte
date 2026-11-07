@@ -51,8 +51,10 @@
 		</div>
 	{:else if pdfUrl}
 		<div class="space-y-4">
+			<!-- Hide the viewer's toolbar: its save icon can't use our filename, so
+			     Download PDF below is the one way to save a properly named file. -->
 			<iframe
-				src={pdfUrl}
+				src={`${pdfUrl}#toolbar=0&navpanes=0`}
 				class="h-[60vh] w-full rounded-lg border border-gray-200"
 				title="PDF Preview"
 			></iframe>
