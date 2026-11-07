@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { calculator, totalFlightTime, totalFuelBurn } from '$lib/stores';
 	import { Input } from '$lib/components/ui';
+	import { formatHours } from '$lib/utils/format';
 
 	function handleHourlyChange(field: string, value: string) {
 		const numValue = parseFloat(value) || 0;
@@ -25,12 +26,6 @@
 		calculator.updateCosts('misc', { [field]: numValue });
 	}
 
-	// Format display
-	function formatHours(hours: number): string {
-		const h = Math.floor(hours);
-		const m = Math.round((hours - h) * 60);
-		return `${h}h ${m}m`;
-	}
 </script>
 
 <div class="space-y-6">
@@ -45,7 +40,7 @@
 		<div class="grid gap-4 sm:grid-cols-3">
 			<Input
 				type="number"
-				label="Maintenance Program ($/hr)"
+				label="Maintenance Programs ($/hr)"
 				min="0"
 				step="25"
 				value={$calculator.estimate.costs.hourly.maintenanceProgram.toString()}

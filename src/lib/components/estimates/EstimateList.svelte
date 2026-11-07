@@ -57,7 +57,7 @@
 			totalDailyRates * costs.crew.numberOfDays +
 			costs.crew.hotelPerNight * costs.crew.numberOfNights * crewCount +
 			costs.crew.mealsPerDay * costs.crew.numberOfDays * crewCount +
-			costs.crew.perPersonExpenses * crewCount +
+			costs.crew.perPersonExpenses * costs.crew.numberOfDays * crewCount +
 			costs.crew.rentalCar +
 			costs.crew.airfare +
 			costs.crew.mileage;
@@ -166,6 +166,13 @@
 					<h3 class="font-semibold text-gray-900 group-hover:text-red-700">
 						{estimate.name}
 					</h3>
+					{#if estimate.estimate_data.tailNumber || estimate.estimate_data.aircraftType}
+						<p class="mt-1 text-xs font-medium text-gray-600">
+							{[estimate.estimate_data.tailNumber, estimate.estimate_data.aircraftType]
+								.filter(Boolean)
+								.join(' · ')}
+						</p>
+					{/if}
 					<p class="mt-1 text-sm text-gray-500">
 						{getRouteDisplay(estimate.estimate_data)}
 					</p>

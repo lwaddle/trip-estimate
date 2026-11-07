@@ -21,7 +21,7 @@
 					Aviation Cost Estimation
 				</h1>
 				<p class="mx-auto mt-6 max-w-2xl text-lg text-red-100 sm:text-xl">
-					Calculate trip costs for private aviation with precision. Track fuel, crew expenses,
+					Calculate trip costs for private aviation. Track fuel, crew expenses,
 					airport fees, and more in one powerful tool.
 				</p>
 				<div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

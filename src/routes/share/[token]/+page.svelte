@@ -5,6 +5,8 @@
 	import { Button } from '$lib/components/ui';
 	import { DetailedCostBreakdown } from '$lib/components/share';
 	import { downloadPDF } from '$lib/utils/pdf';
+	import { DISCLAIMER } from '$lib/utils/disclaimer';
+	import { formatHours } from '$lib/utils/format';
 	import type { EstimateData } from '$lib/types/database';
 
 	interface ShareData {
@@ -76,12 +78,6 @@
 		const hours = date.getUTCHours().toString().padStart(2, '0');
 		const minutes = date.getUTCMinutes().toString().padStart(2, '0');
 		return `${dateFormatted} ${hours}:${minutes} UTC`;
-	}
-
-	function formatHours(hours: number): string {
-		const h = Math.floor(hours);
-		const m = Math.round((hours - h) * 60);
-		return `${h}h ${m}m`;
 	}
 
 	function formatGallons(fuelBurnLbs: number): string {
@@ -186,6 +182,7 @@
 				<p class="mt-1 text-sm text-gray-500">
 					Prepared {formatDateTime(estimate.updated_at)}{estimate.creator_email ? ` by ${estimate.creator_email}` : ''}
 				</p>
+				<p class="mt-2 text-xs text-gray-400">{DISCLAIMER.short}</p>
 			</div>
 
 			<!-- Flight Legs -->
@@ -230,6 +227,16 @@
 			<div class="mb-8 rounded-xl bg-white p-4 shadow-sm ring-1 ring-gray-200 sm:p-6">
 				<h2 class="mb-6 text-lg font-semibold text-gray-900">Cost Breakdown</h2>
 				<DetailedCostBreakdown {data} />
+			</div>
+
+			<!-- Disclaimer -->
+			<div class="mb-8 space-y-2 px-1 text-xs text-gray-400">
+				<p class="font-semibold">{DISCLAIMER.heading}</p>
+				<p>{DISCLAIMER.intro}</p>
+				{#each DISCLAIMER.items as item}
+					<p>{item.label}: {item.text}</p>
+				{/each}
+				<p>{DISCLAIMER.closing}</p>
 			</div>
 
 			<!-- Action Buttons -->
