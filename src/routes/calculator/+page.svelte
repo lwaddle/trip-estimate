@@ -27,7 +27,10 @@
 		// Only apply on initial load for new estimates after profiles are loaded
 		if (!initialProfileApplied && savedId === null && profilesLoaded && profile) {
 			profiles.select(profile.id);
-			calculator.setProfile(profile.id);
+			calculator.setProfile(profile.id, {
+				aircraftType: profile.aircraftType,
+				tailNumber: profile.tailNumber
+			});
 			calculator.applyProfileDefaults(profile.defaults);
 			calculator.clearUnsavedChanges(); // Don't show "unsaved changes" for initial profile
 			initialProfileApplied = true;
@@ -95,14 +98,18 @@
 		const target = e.target as HTMLSelectElement;
 		const profileId = target.value || null;
 		profiles.select(profileId);
-		calculator.setProfile(profileId);
 
-		if (profileId) {
-			const profile = $profiles.profiles.find((p) => p.id === profileId);
-			if (profile) {
-				calculator.applyProfileDefaults(profile.defaults);
-				ui.showToast(`Applied ${profile.name} defaults`, 'success');
-			}
+		const profile = profileId
+			? $profiles.profiles.find((p) => p.id === profileId)
+			: undefined;
+		calculator.setProfile(profileId, {
+			aircraftType: profile?.aircraftType,
+			tailNumber: profile?.tailNumber
+		});
+
+		if (profile) {
+			calculator.applyProfileDefaults(profile.defaults);
+			ui.showToast(`Applied ${profile.name} defaults`, 'success');
 		}
 	}
 

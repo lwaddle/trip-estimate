@@ -4,6 +4,8 @@
 	import type { AircraftProfile } from '$lib/types/database';
 
 	let name = $state('');
+	let aircraftType = $state('');
+	let tailNumber = $state('');
 	let isDefault = $state(false);
 	let defaults = $state({
 		fuelPrice: 5.5,
@@ -25,11 +27,15 @@
 			if ($profiles.editingProfile) {
 				// Editing existing
 				name = $profiles.editingProfile.name;
+				aircraftType = $profiles.editingProfile.aircraftType ?? '';
+				tailNumber = $profiles.editingProfile.tailNumber ?? '';
 				isDefault = $profiles.editingProfile.isDefault;
 				defaults = { ...$profiles.editingProfile.defaults };
 			} else {
 				// Creating new
 				name = '';
+				aircraftType = '';
+				tailNumber = '';
 				isDefault = false;
 				defaults = {
 					fuelPrice: 5.5,
@@ -65,6 +71,8 @@
 			// Update existing
 			profiles.updateProfile($profiles.editingProfile.id, {
 				name: name.trim(),
+				aircraftType: aircraftType.trim() || undefined,
+				tailNumber: tailNumber.trim() || undefined,
 				defaults
 			});
 			if (isDefault) {
@@ -76,6 +84,8 @@
 			const newProfile: AircraftProfile = {
 				id: crypto.randomUUID(),
 				name: name.trim(),
+				aircraftType: aircraftType.trim() || undefined,
+				tailNumber: tailNumber.trim() || undefined,
 				imageUrl: null,
 				defaults,
 				isCustom: true,
@@ -115,6 +125,16 @@
 		{/if}
 
 		<Input label="Name" bind:value={name} placeholder="e.g., My Citation X" required />
+
+		<!-- Aircraft Identity -->
+		<div class="grid gap-4 sm:grid-cols-2">
+			<Input
+				label="Aircraft Type"
+				bind:value={aircraftType}
+				placeholder="e.g., Citation 560XL (XLS+)"
+			/>
+			<Input label="Tail Number" bind:value={tailNumber} placeholder="e.g., N491JL" />
+		</div>
 
 		<!-- Fuel Settings -->
 		<div class="border-t border-gray-200 pt-4">

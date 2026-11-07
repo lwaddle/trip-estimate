@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { EstimateData } from '$lib/types/database';
+	import { formatFuelPrice, formatGallons, formatHours, formatRate, pluralize } from '$lib/utils/format';
 
 	interface Props {
 		data: EstimateData;
@@ -16,23 +17,8 @@
 		}).format(value);
 	}
 
-	function formatHours(hours: number): string {
-		const h = Math.floor(hours);
-		const m = Math.round((hours - h) * 60);
-		return `${h}h ${m}m`;
-	}
-
 	function formatDecimalHours(hours: number): string {
 		return `${hours.toFixed(1)} hrs`;
-	}
-
-	function formatRate(value: number): string {
-		return new Intl.NumberFormat('en-US', {
-			style: 'currency',
-			currency: 'USD',
-			minimumFractionDigits: value < 100 ? 2 : 0,
-			maximumFractionDigits: value < 100 ? 2 : 0
-		}).format(value);
 	}
 
 	// Calculate all derived values
@@ -55,7 +41,7 @@
 		const crewDailyRates = totalDailyRates * costs.crew.numberOfDays;
 		const crewHotel = costs.crew.hotelPerNight * costs.crew.numberOfNights * crewCount;
 		const crewMeals = costs.crew.mealsPerDay * costs.crew.numberOfDays * crewCount;
-		const crewPerPerson = costs.crew.perPersonExpenses * crewCount;
+		const crewPerPerson = costs.crew.perPersonExpenses * costs.crew.numberOfDays * crewCount;
 		const crewRentalCar = costs.crew.rentalCar;
 		const crewAirfare = costs.crew.airfare;
 		const crewMileage = costs.crew.mileage;
@@ -204,10 +190,10 @@
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
-					{ label: 'Daily rates', detail: `${data.costs.crew.numberOfDays} days @ ${formatRate(data.crew.reduce((sum, m) => sum + m.dailyRate, 0))}/day`, value: calculations.crew.dailyRates },
-					{ label: 'Hotel', detail: `${data.costs.crew.numberOfNights} nights × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.hotelPerNight)}/night`, value: calculations.crew.hotel },
-					{ label: 'Meals', detail: `${data.costs.crew.numberOfDays} days × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.mealsPerDay)}/day`, value: calculations.crew.meals },
-					{ label: 'Per-person expenses', detail: `${calculations.crewCount} crew @ ${formatRate(data.costs.crew.perPersonExpenses)}/person`, value: calculations.crew.perPerson },
+					{ label: 'Daily rates', detail: `${pluralize(data.costs.crew.numberOfDays, 'day')} @ ${formatRate(data.crew.reduce((sum, m) => sum + m.dailyRate, 0))}/day`, value: calculations.crew.dailyRates },
+					{ label: 'Hotel', detail: `${pluralize(data.costs.crew.numberOfNights, 'night')} × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.hotelPerNight)}/night`, value: calculations.crew.hotel },
+					{ label: 'Meals', detail: `${pluralize(data.costs.crew.numberOfDays, 'day')} × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.mealsPerDay)}/day`, value: calculations.crew.meals },
+					{ label: 'Per-person expenses', detail: `${pluralize(data.costs.crew.numberOfDays, 'day')} × ${calculations.crewCount} crew @ ${formatRate(data.costs.crew.perPersonExpenses)}/day`, value: calculations.crew.perPerson },
 					{ label: 'Rental car', value: calculations.crew.rentalCar },
 					{ label: 'Airfare', value: calculations.crew.airfare },
 					{ label: 'Mileage', value: calculations.crew.mileage }
@@ -268,8 +254,8 @@
 			</div>
 			<div class="space-y-2 text-sm">
 				{#each getLineItems([
-					{ label: 'Flight fuel', detail: `${Math.round(calculations.fuel.gallons).toLocaleString()} gal @ ${formatRate(data.costs.fuel.pricePerGallon)}/gal`, value: calculations.fuel.burnCost },
-					{ label: 'APU', detail: `${Math.round(calculations.fuel.apuGallons).toLocaleString()} gal @ ${formatRate(data.costs.fuel.pricePerGallon)}/gal`, value: calculations.fuel.apuCost }
+					{ label: 'Flight fuel', detail: `${formatGallons(calculations.fuel.gallons)} @ est. avg. ${formatFuelPrice(data.costs.fuel.pricePerGallon)}/gal`, value: calculations.fuel.burnCost },
+					{ label: 'APU', detail: `${formatGallons(calculations.fuel.apuGallons)} @ est. avg. ${formatFuelPrice(data.costs.fuel.pricePerGallon)}/gal`, value: calculations.fuel.apuCost }
 				]) as item}
 					<div class="line-item">
 						<div class="line-item-label">
@@ -357,7 +343,7 @@
 	<!-- Grand Total -->
 	<div class="rounded-xl bg-gray-100 p-6">
 		<div class="flex items-center justify-between">
-			<span class="text-lg font-semibold text-gray-900">Total Estimate</span>
+			<span class="text-lg font-semibold text-gray-900">Estimated Total</span>
 			<span class="text-xl font-bold text-gray-900">{formatCurrency(calculations.grandTotal)}</span>
 		</div>
 	</div>

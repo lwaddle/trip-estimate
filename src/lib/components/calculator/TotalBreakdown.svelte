@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { costBreakdown, totalFlightTime, totalFuelBurn } from '$lib/stores';
+	import { formatHours } from '$lib/utils/format';
 
 	function formatCurrency(value: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -8,12 +9,6 @@
 			minimumFractionDigits: 0,
 			maximumFractionDigits: 0
 		}).format(value);
-	}
-
-	function formatHours(hours: number): string {
-		const h = Math.floor(hours);
-		const m = Math.round((hours - h) * 60);
-		return `${h}h ${m}m`;
 	}
 
 	const categories = [

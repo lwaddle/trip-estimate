@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
-import type { EstimateData, FlightLeg, CrewMember, CostCategory } from '$lib/types/database';
-import logoUrl from '$lib/assets/logo-light.png';
+import type { EstimateData, FlightLeg, CostCategory } from '$lib/types/database';
+import { DISCLAIMER } from './disclaimer';
+import { formatFuelPrice, formatGallons, formatHours, formatRate, pdfFilename, pluralize } from './format';
 
 interface DetailedCostBreakdown {
 	totalFlightTime: number;
@@ -67,7 +68,7 @@ function calculateDetailedCosts(data: EstimateData): DetailedCostBreakdown {
 	const crewDailyRates = totalDailyRates * costs.crew.numberOfDays;
 	const crewHotel = costs.crew.hotelPerNight * costs.crew.numberOfNights * crewCount;
 	const crewMeals = costs.crew.mealsPerDay * costs.crew.numberOfDays * crewCount;
-	const crewPerPerson = costs.crew.perPersonExpenses * crewCount;
+	const crewPerPerson = costs.crew.perPersonExpenses * costs.crew.numberOfDays * crewCount;
 	const crewRentalCar = costs.crew.rentalCar;
 	const crewAirfare = costs.crew.airfare;
 	const crewMileage = costs.crew.mileage;
@@ -161,10 +162,11 @@ function formatCurrency(value: number): string {
 	}).format(value);
 }
 
-function formatHours(hours: number): string {
-	const h = Math.floor(hours);
-	const m = Math.round((hours - h) * 60);
-	return `${h}h ${m}m`;
+// jsPDF ignores charSpace when computing alignment offsets, so right-aligning
+// letter-spaced text overflows past the anchor. Position it manually instead.
+function rightSpacedText(doc: jsPDF, text: string, x: number, y: number, charSpace: number): void {
+	const width = doc.getTextWidth(text) + charSpace * Math.max(0, text.length - 1);
+	doc.text(text, x - width, y, { charSpace });
 }
 
 function addLineItem(
@@ -173,18 +175,30 @@ function addLineItem(
 	value: number,
 	margin: number,
 	y: number,
-	pageWidth: number,
-	rowCounter: { count: number }
+	pageWidth: number
 ): number {
 	if (value <= 0) return y;
-	if (rowCounter.count % 2 === 0) {
-		doc.setFillColor(245, 245, 245);
-		doc.rect(margin, y - 3.5, pageWidth - 2 * margin, 5, 'F');
-	}
-	rowCounter.count++;
+	// Line items sit one tier below the bold black section subtotal
+	doc.setTextColor(90);
 	doc.text(`  ${label}`, margin, y);
 	doc.text(formatCurrency(value), pageWidth - margin, y, { align: 'right' });
+	// Subtle bottom rule to guide the eye without heavy banding
+	doc.setDrawColor(232);
+	doc.setLineWidth(0.1);
+	doc.line(margin, y + 1.5, pageWidth - margin, y + 1.5);
 	return y + 5;
+}
+
+function sectionHeading(doc: jsPDF, title: string, margin: number, y: number, pageWidth: number): number {
+	doc.setFontSize(12);
+	doc.setFont('helvetica', 'bold');
+	doc.setTextColor(0);
+	doc.text(title, margin, y);
+	y += 2.5;
+	doc.setDrawColor(220);
+	doc.setLineWidth(0.2);
+	doc.line(margin, y, pageWidth - margin, y);
+	return y + 5.5;
 }
 
 function checkPageBreak(doc: jsPDF, y: number, margin: number, needed: number = 30): number {
@@ -196,226 +210,233 @@ function checkPageBreak(doc: jsPDF, y: number, margin: number, needed: number = 
 	return y;
 }
 
+function renderSection(
+	doc: jsPDF,
+	title: string,
+	total: number,
+	items: { label: string; value: number }[],
+	margin: number,
+	y: number,
+	pageWidth: number
+): number {
+	const visible = items.filter((it) => it.value > 0);
+	if (total <= 0 || visible.length === 0) return y;
+
+	// Reserve only the space this section actually needs (header + rows)
+	// so a short section doesn't trigger a premature page break.
+	const needed = 12 + visible.length * 5;
+	y = checkPageBreak(doc, y, margin, needed);
+
+	doc.setFontSize(10);
+	doc.setFont('helvetica', 'bold');
+	doc.setTextColor(0);
+	doc.text(title, margin, y);
+	doc.text(formatCurrency(total), pageWidth - margin, y, { align: 'right' });
+	y += 2;
+	doc.setDrawColor(220);
+	doc.setLineWidth(0.2);
+	doc.line(margin, y, pageWidth - margin, y);
+	y += 5;
+
+	doc.setFontSize(9);
+	doc.setFont('helvetica', 'normal');
+	for (const it of visible) {
+		y = addLineItem(doc, it.label, it.value, margin, y, pageWidth);
+	}
+	return y + 5;
+}
+
+// Fine print: small and gray, kept together so it never splits across pages.
+function renderDisclaimer(doc: jsPDF, margin: number, y: number, pageWidth: number): number {
+	const lineHeight = 2.8;
+	doc.setFontSize(7);
+	doc.setFont('helvetica', 'normal');
+	const lines: string[] = [DISCLAIMER.intro, ...DISCLAIMER.items.map((it) => `${it.label}: ${it.text}`), DISCLAIMER.closing].flatMap(
+		(paragraph) => doc.splitTextToSize(paragraph, pageWidth - 2 * margin)
+	);
+
+	// Measured to the last line's baseline, which must clear the footer rule
+	const lastBaseline = y + 3.5 + (lines.length - 1) * lineHeight;
+	if (lastBaseline > doc.internal.pageSize.getHeight() - 18) {
+		doc.addPage();
+		y = margin;
+	}
+
+	doc.setFont('helvetica', 'bold');
+	doc.setTextColor(130);
+	doc.text(DISCLAIMER.heading, margin, y);
+	y += 3.5;
+
+	doc.setFont('helvetica', 'normal');
+	for (const line of lines) {
+		doc.text(line, margin, y);
+		y += lineHeight;
+	}
+	doc.setTextColor(0);
+	return y;
+}
+
 export function generatePDF(name: string, data: EstimateData): jsPDF {
-	const doc = new jsPDF();
+	// US Letter, not jsPDF's A4 default: A4 is ~18 mm taller, so printing it
+	// on Letter paper at 100% clipped the footer and lowest rows.
+	const doc = new jsPDF({ format: 'letter' });
+	doc.setProperties({ title: pdfFilename(name).replace(/\.pdf$/, '') });
 	const pageWidth = doc.internal.pageSize.getWidth();
 	const margin = 20;
 	let y = margin;
 
 	const costs = calculateDetailedCosts(data);
+	const crewCosts = data.costs.crew;
+	const days = pluralize(crewCosts.numberOfDays, 'day');
+	const nights = pluralize(crewCosts.numberOfNights, 'night');
+	const combinedDailyRate = data.crew.reduce((sum, m) => sum + m.dailyRate, 0);
 
-	// Header with logo
-	// Logo dimensions: 400x191 pixels (roughly 2:1 ratio), scale to ~50mm wide
-	const logoWidth = 24;
-	const logoHeight = 11;
-	doc.addImage(logoUrl, 'PNG', margin, y - 5, logoWidth, logoHeight);
-	y += logoHeight + 5;
-
-	doc.setFontSize(16);
+	// Header — title treatment (no logo)
+	doc.setFontSize(8);
 	doc.setFont('helvetica', 'bold');
-	doc.text(name, margin, y);
+	doc.setTextColor(150);
+	doc.text('TRIP COST ESTIMATE  ·  FOR BUDGETING ONLY', margin, y, { charSpace: 0.5 });
+	y += 8;
+
+	doc.setFontSize(18);
+	doc.setFont('helvetica', 'bold');
+	doc.setTextColor(20);
+	// Long names wrap rather than running off the page
+	const titleLines: string[] = doc.splitTextToSize(name, pageWidth - 2 * margin);
+	titleLines.forEach((line, i) => {
+		if (i > 0) y += 7.5;
+		doc.text(line, margin, y);
+	});
 	y += 6;
 
+	// Aircraft identity (tail · type) — whichever fields are present
+	const aircraftLine = [data.tailNumber, data.aircraftType]
+		.map((s) => s?.trim())
+		.filter(Boolean)
+		.join('  ·  ');
+	if (aircraftLine) {
+		doc.setFontSize(9.5);
+		doc.setFont('helvetica', 'bold');
+		doc.setTextColor(90);
+		doc.text(aircraftLine, margin, y);
+		y += 6;
+	}
+
 	doc.setFontSize(9);
 	doc.setFont('helvetica', 'normal');
-	doc.setTextColor(100);
-	doc.text(`Prepared: ${new Date().toLocaleDateString()}`, margin, y);
+	doc.setTextColor(120);
+	doc.text(`Prepared ${new Date().toLocaleDateString()}  ·  ${DISCLAIMER.short}`, margin, y);
 	doc.setTextColor(0);
-	y += 12;
+	y += 7;
 
-	// Summary Box
-	doc.setFillColor(254, 242, 242); // Light red background
-	doc.roundedRect(margin, y, pageWidth - 2 * margin, 28, 3, 3, 'F');
-	y += 10;
+	// Summary card
+	const cardH = 22;
+	doc.setFillColor(247, 248, 250); // subtle neutral
+	doc.roundedRect(margin, y, pageWidth - 2 * margin, cardH, 2, 2, 'F');
 
-	doc.setFontSize(11);
-	doc.setFont('helvetica', 'normal');
-	doc.text('Total Estimate', margin + 8, y);
+	const labelY = y + 9;
+	const valueY = y + 16;
+	const fuelEdge = pageWidth - margin - 8;
+	const timeEdge = fuelEdge - 34;
 
-	doc.setFontSize(20);
+	// Labels — uniform size, color, and tracking
+	doc.setFontSize(7.5);
 	doc.setFont('helvetica', 'bold');
-	doc.text(formatCurrency(costs.grandTotal), margin + 8, y + 10);
+	doc.setTextColor(140);
+	doc.text('TOTAL ESTIMATE', margin + 8, labelY, { charSpace: 0.5 });
+	rightSpacedText(doc, 'FLIGHT TIME', timeEdge, labelY, 0.5);
+	rightSpacedText(doc, 'FUEL', fuelEdge, labelY, 0.5);
 
-	doc.setFontSize(9);
-	doc.setFont('helvetica', 'normal');
-	doc.text(`Flight Time: ${formatHours(costs.totalFlightTime)}`, pageWidth - margin - 8, y, { align: 'right' });
-	doc.text(`Fuel: ${Math.round(costs.totalFuelGallons).toLocaleString()} gal`, pageWidth - margin - 8, y + 10, { align: 'right' });
-	y += 25;
-
-	// Flight Itinerary
-	y += 8;
+	// Values — same size and style across all three fields
 	doc.setFontSize(12);
 	doc.setFont('helvetica', 'bold');
-	doc.text('Flight Itinerary', margin, y);
-	y += 7;
+	doc.setTextColor(45);
+	doc.text(formatCurrency(costs.grandTotal), margin + 8, valueY);
+	doc.text(formatHours(costs.totalFlightTime), timeEdge, valueY, { align: 'right' });
+	doc.text(`${Math.round(costs.totalFuelGallons).toLocaleString()} gal`, fuelEdge, valueY, { align: 'right' });
+
+	doc.setTextColor(0);
+	y += cardH + 10;
+
+	// Flight Itinerary
+	y = sectionHeading(doc, 'Flight Itinerary', margin, y, pageWidth);
 
 	doc.setFontSize(9);
 	doc.setFont('helvetica', 'normal');
 
 	data.legs.forEach((leg, i) => {
 		y = checkPageBreak(doc, y, margin, 10);
-		if (i % 2 === 0) {
-			doc.setFillColor(245, 245, 245);
-			doc.rect(margin, y - 3.5, pageWidth - 2 * margin, 5, 'F');
-		}
-		const route = `${leg.origin || '???'}  -  ${leg.destination || '???'}`;
+		const route = `${leg.origin || '???'} — ${leg.destination || '???'}`;
 		const time = formatHours(leg.flightTimeHours + leg.flightTimeMinutes / 60);
 
 		doc.text(`Leg ${i + 1}: ${route}`, margin, y);
 		doc.text(time, pageWidth - margin, y, { align: 'right' });
+		doc.setDrawColor(232);
+		doc.setLineWidth(0.1);
+		doc.line(margin, y + 1.5, pageWidth - margin, y + 1.5);
 		y += 5;
 	});
 
-	// Crew
 	y += 8;
-	y = checkPageBreak(doc, y, margin, 15);
-	doc.setFontSize(12);
-	doc.setFont('helvetica', 'bold');
-	doc.text('Crew', margin, y);
-	y += 7;
-
-	doc.setFontSize(9);
-	doc.setFont('helvetica', 'normal');
-	const pilots = data.crew.filter((c) => c.role === 'pilot').length;
-	const fas = data.crew.filter((c) => c.role === 'attendant').length;
-	const crewParts = [];
-	if (pilots > 0) crewParts.push(`${pilots} Pilot${pilots > 1 ? 's' : ''}`);
-	if (fas > 0) crewParts.push(`${fas} Flight Attendant${fas > 1 ? 's' : ''}`);
-	doc.text(crewParts.join(', ') || 'No crew assigned', margin, y);
-	y += 10;
 
 	// Cost Breakdown Header
 	y = checkPageBreak(doc, y, margin, 20);
-	doc.setFontSize(12);
-	doc.setFont('helvetica', 'bold');
-	doc.text('Cost Breakdown', margin, y);
-	y += 10;
+	y = sectionHeading(doc, 'Cost Breakdown', margin, y, pageWidth);
+	y += 1.5;
 
-	// Crew Costs
-	if (costs.crew.total > 0) {
-		y = checkPageBreak(doc, y, margin, 60);
-		doc.setFontSize(10);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Crew Costs', margin, y);
-		doc.text(formatCurrency(costs.crew.total), pageWidth - margin, y, { align: 'right' });
-		y += 2;
-		doc.setDrawColor(220);
-		doc.line(margin, y, pageWidth - margin, y);
-		y += 5;
+	y = renderSection(doc, 'Crew Costs', costs.crew.total, [
+		{ label: `Daily rates (${days} @ ${formatRate(combinedDailyRate)}/day)`, value: costs.crew.dailyRates },
+		{ label: `Hotel (${nights} × ${costs.crewCount} crew @ ${formatRate(crewCosts.hotelPerNight)}/night)`, value: costs.crew.hotel },
+		{ label: `Meals (${days} × ${costs.crewCount} crew @ ${formatRate(crewCosts.mealsPerDay)}/day)`, value: costs.crew.meals },
+		{ label: `Per-person expenses (${days} × ${costs.crewCount} crew @ ${formatRate(crewCosts.perPersonExpenses)}/day)`, value: costs.crew.perPerson },
+		{ label: 'Rental car', value: costs.crew.rentalCar },
+		{ label: 'Airfare', value: costs.crew.airfare },
+		{ label: 'Mileage', value: costs.crew.mileage }
+	], margin, y, pageWidth);
 
-		doc.setFontSize(8);
-		doc.setFont('helvetica', 'normal');
-		const rc = { count: 0 };
-		y = addLineItem(doc, `Daily rates (${data.costs.crew.numberOfDays} days)`, costs.crew.dailyRates, margin, y, pageWidth, rc);
-		y = addLineItem(doc, `Hotel (${data.costs.crew.numberOfNights} nights × ${costs.crewCount} crew)`, costs.crew.hotel, margin, y, pageWidth, rc);
-		y = addLineItem(doc, `Meals (${data.costs.crew.numberOfDays} days × ${costs.crewCount} crew)`, costs.crew.meals, margin, y, pageWidth, rc);
-		y = addLineItem(doc, `Per-person expenses (${costs.crewCount} crew)`, costs.crew.perPerson, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Rental car', costs.crew.rentalCar, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Airfare', costs.crew.airfare, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Mileage', costs.crew.mileage, margin, y, pageWidth, rc);
-		y += 5;
-	}
+	y = renderSection(doc, 'Hourly Programs & Reserves', costs.hourly.total, [
+		{ label: `Maintenance programs (${formatHours(costs.totalFlightTime)} @ ${formatRate(data.costs.hourly.maintenanceProgram)}/hr)`, value: costs.hourly.maintenance },
+		{ label: `Consumables (${formatHours(costs.totalFlightTime)} @ ${formatRate(data.costs.hourly.consumables)}/hr)`, value: costs.hourly.consumables },
+		{ label: `Additional reserve (${formatHours(costs.totalFlightTime)} @ ${formatRate(data.costs.hourly.additionalReserve)}/hr)`, value: costs.hourly.reserve }
+	], margin, y, pageWidth);
 
-	// Hourly Programs & Reserves
-	if (costs.hourly.total > 0) {
-		y = checkPageBreak(doc, y, margin, 30);
-		doc.setFontSize(10);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Hourly Programs & Reserves', margin, y);
-		doc.text(formatCurrency(costs.hourly.total), pageWidth - margin, y, { align: 'right' });
-		y += 2;
-		doc.setDrawColor(220);
-		doc.line(margin, y, pageWidth - margin, y);
-		y += 5;
+	y = renderSection(doc, 'Fuel', costs.fuel.total, [
+		{ label: `Flight fuel (${formatGallons(costs.fuel.gallons)} @ est. avg. ${formatFuelPrice(data.costs.fuel.pricePerGallon)}/gal)`, value: costs.fuel.burnCost },
+		{ label: `APU (${formatGallons(costs.fuel.apuGallons)} @ est. avg. ${formatFuelPrice(data.costs.fuel.pricePerGallon)}/gal)`, value: costs.fuel.apuCost }
+	], margin, y, pageWidth);
 
-		doc.setFontSize(8);
-		doc.setFont('helvetica', 'normal');
-		const rc = { count: 0 };
-		y = addLineItem(doc, `Maintenance program (${formatHours(costs.totalFlightTime)})`, costs.hourly.maintenance, margin, y, pageWidth, rc);
-		y = addLineItem(doc, `Consumables (${formatHours(costs.totalFlightTime)})`, costs.hourly.consumables, margin, y, pageWidth, rc);
-		y = addLineItem(doc, `Additional reserve (${formatHours(costs.totalFlightTime)})`, costs.hourly.reserve, margin, y, pageWidth, rc);
-		y += 5;
-	}
+	y = renderSection(doc, 'Airport & Ground', costs.airport.total, [
+		{ label: 'Landing fees', value: costs.airport.landingFees },
+		{ label: 'Catering', value: costs.airport.catering },
+		{ label: 'Ground handling', value: costs.airport.handling },
+		{ label: 'Passenger transport', value: costs.airport.passengerTransport },
+		{ label: 'Facility fees', value: costs.airport.facilityFees },
+		{ label: 'Special event fees', value: costs.airport.specialEventFees },
+		{ label: 'Ramp parking', value: costs.airport.rampParking },
+		{ label: 'Customs', value: costs.airport.customs },
+		{ label: 'Hangar', value: costs.airport.hangar }
+	], margin, y, pageWidth);
 
-	// Fuel
-	if (costs.fuel.total > 0) {
-		y = checkPageBreak(doc, y, margin, 25);
-		doc.setFontSize(10);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Fuel', margin, y);
-		doc.text(formatCurrency(costs.fuel.total), pageWidth - margin, y, { align: 'right' });
-		y += 2;
-		doc.setDrawColor(220);
-		doc.line(margin, y, pageWidth - margin, y);
-		y += 5;
+	y = renderSection(doc, 'Miscellaneous', costs.misc.total, [
+		{ label: 'Trip coordination', value: costs.misc.tripCoordination },
+		{ label: 'Other', value: costs.misc.other }
+	], margin, y, pageWidth);
 
-		doc.setFontSize(8);
-		doc.setFont('helvetica', 'normal');
-		const rc = { count: 0 };
-		y = addLineItem(doc, `Flight fuel (${Math.round(costs.fuel.gallons).toLocaleString()} gal @ $${data.costs.fuel.pricePerGallon}/gal)`, costs.fuel.burnCost, margin, y, pageWidth, rc);
-		y = addLineItem(doc, `APU (${Math.round(costs.fuel.apuGallons).toLocaleString()} gal)`, costs.fuel.apuCost, margin, y, pageWidth, rc);
-		y += 5;
-	}
-
-	// Airport & Ground
-	if (costs.airport.total > 0) {
-		y = checkPageBreak(doc, y, margin, 60);
-		doc.setFontSize(10);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Airport & Ground', margin, y);
-		doc.text(formatCurrency(costs.airport.total), pageWidth - margin, y, { align: 'right' });
-		y += 2;
-		doc.setDrawColor(220);
-		doc.line(margin, y, pageWidth - margin, y);
-		y += 5;
-
-		doc.setFontSize(8);
-		doc.setFont('helvetica', 'normal');
-		const rc = { count: 0 };
-		y = addLineItem(doc, 'Landing fees', costs.airport.landingFees, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Catering', costs.airport.catering, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Ground handling', costs.airport.handling, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Passenger transport', costs.airport.passengerTransport, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Facility fees', costs.airport.facilityFees, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Special event fees', costs.airport.specialEventFees, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Ramp parking', costs.airport.rampParking, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Customs', costs.airport.customs, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Hangar', costs.airport.hangar, margin, y, pageWidth, rc);
-		y += 5;
-	}
-
-	// Miscellaneous
-	if (costs.misc.total > 0) {
-		y = checkPageBreak(doc, y, margin, 25);
-		doc.setFontSize(10);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Miscellaneous', margin, y);
-		doc.text(formatCurrency(costs.misc.total), pageWidth - margin, y, { align: 'right' });
-		y += 2;
-		doc.setDrawColor(220);
-		doc.line(margin, y, pageWidth - margin, y);
-		y += 5;
-
-		doc.setFontSize(8);
-		doc.setFont('helvetica', 'normal');
-		const rc = { count: 0 };
-		y = addLineItem(doc, 'Trip coordination', costs.misc.tripCoordination, margin, y, pageWidth, rc);
-		y = addLineItem(doc, 'Other', costs.misc.other, margin, y, pageWidth, rc);
-		y += 5;
-	}
-
-	// Grand Total
-	y = checkPageBreak(doc, y, margin, 20);
-	y += 3;
+	// Grand Total — reserve only its rule and text, so it isn't stranded alone
+	// on a new page when it fits under the last section.
+	y = checkPageBreak(doc, y, margin, 10);
+	y += 1;
 	doc.setDrawColor(200);
+	doc.setLineWidth(0.2);
 	doc.line(margin, y, pageWidth - margin, y);
-	y += 8;
+	y += 7;
 
 	doc.setFontSize(12);
 	doc.setFont('helvetica', 'bold');
-	doc.text('Total Estimate', margin, y);
+	doc.setTextColor(0);
+	doc.text('Estimated Total', margin, y);
 	doc.text(formatCurrency(costs.grandTotal), pageWidth - margin, y, { align: 'right' });
-	y += 12;
+	y += 8;
 
 	// Notes
 	if (data.notes) {
@@ -435,20 +456,33 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 		});
 	}
 
-	// Footer
+	y = renderDisclaimer(doc, margin, y, pageWidth);
+
+	// Footer — drawn on every page
+	const pageCount = doc.getNumberOfPages();
 	const footerY = doc.internal.pageSize.getHeight() - 12;
-	doc.setFontSize(8);
-	doc.setTextColor(150);
-	doc.text('JLW Aviation Trip Estimate', margin, footerY);
-	doc.text(new Date().toLocaleString(), pageWidth - margin - 40, footerY);
+	const generated = new Date().toLocaleString();
+	for (let p = 1; p <= pageCount; p++) {
+		doc.setPage(p);
+		doc.setDrawColor(230);
+		doc.setLineWidth(0.1);
+		doc.line(margin, footerY - 4, pageWidth - margin, footerY - 4);
+
+		doc.setFontSize(8);
+		doc.setFont('helvetica', 'normal');
+		doc.setTextColor(150);
+		doc.text(DISCLAIMER.footer, margin, footerY);
+		doc.text(`Generated ${generated}`, pageWidth / 2, footerY, { align: 'center' });
+		doc.text(`Page ${p} of ${pageCount}`, pageWidth - margin, footerY, { align: 'right' });
+	}
+	doc.setTextColor(0);
 
 	return doc;
 }
 
 export function downloadPDF(name: string, data: EstimateData): void {
 	const doc = generatePDF(name, data);
-	const filename = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_estimate.pdf`;
-	doc.save(filename);
+	doc.save(pdfFilename(name));
 }
 
 export function getPDFDataUrl(name: string, data: EstimateData): string {

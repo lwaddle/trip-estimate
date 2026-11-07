@@ -129,11 +129,17 @@ export interface EstimateData {
 	costs: CostCategory;
 	notes: string;
 	profileId: string | null;
+	// Snapshotted from the selected profile so they travel with the estimate
+	// (PDF, share view, history) and survive later profile edits.
+	aircraftType?: string;
+	tailNumber?: string;
 }
 
 export interface AircraftProfile {
 	id: string;
 	name: string;
+	aircraftType?: string;
+	tailNumber?: string;
 	imageUrl: string | null;
 	defaults: {
 		fuelPrice: number;

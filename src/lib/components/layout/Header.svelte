@@ -3,7 +3,6 @@
 	import { auth, isAuthenticated, ui } from '$lib/stores';
 	import { Button } from '$lib/components/ui';
 	import { goto } from '$app/navigation';
-	import logoLight from '$lib/assets/logo-light.svg';
 
 	let userMenuOpen = $state(false);
 	const supabase = createSupabaseClient();
@@ -24,9 +23,9 @@
 
 <header class="border-b border-gray-200 bg-white">
 	<div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-		<!-- Logo -->
-		<a href="/" class="flex items-center">
-			<img src={logoLight} alt="Aviation Trip Estimate" class="h-10" />
+		<!-- Wordmark -->
+		<a href="/" class="flex items-center text-lg font-semibold tracking-tight text-gray-900">
+			Trip Estimate
 		</a>
 
 		<!-- Desktop Nav -->

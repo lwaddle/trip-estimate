@@ -203,10 +203,19 @@ function createCalculatorStore() {
 		},
 
 		// Profile
-		setProfile: (profileId: string | null) => {
+		setProfile: (
+			profileId: string | null,
+			aircraft?: { aircraftType?: string; tailNumber?: string }
+		) => {
 			update((state) => ({
 				...state,
-				estimate: { ...state.estimate, profileId },
+				estimate: {
+					...state.estimate,
+					profileId,
+					// Snapshot identity from the profile; clear it when deselecting
+					aircraftType: profileId ? aircraft?.aircraftType : undefined,
+					tailNumber: profileId ? aircraft?.tailNumber : undefined
+				},
 				hasUnsavedChanges: true
 			}));
 		},
