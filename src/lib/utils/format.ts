@@ -33,3 +33,16 @@ export function formatGallons(gallons: number): string {
 	});
 	return `${amount} gal`;
 }
+
+// A filename people can read, e.g. "Denver - Strawn Dixon - Estimate.pdf".
+// Removes only what operating systems reject, so names otherwise stay as typed.
+export function pdfFilename(name: string): string {
+	const clean = name
+		.replace(/[/\\:|]/g, '-')
+		.replace(/[*?"<>\x00-\x1f]/g, '')
+		.replace(/\s+/g, ' ')
+		.slice(0, 120)
+		.replace(/^[\s.]+|[\s.]+$/g, '');
+	if (!clean) return 'Trip Estimate.pdf';
+	return /estimate$/i.test(clean) ? `${clean}.pdf` : `${clean} - Estimate.pdf`;
+}

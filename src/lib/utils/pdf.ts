@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import type { EstimateData, FlightLeg, CostCategory } from '$lib/types/database';
 import { DISCLAIMER } from './disclaimer';
-import { formatFuelPrice, formatGallons, formatHours, formatRate, pluralize } from './format';
+import { formatFuelPrice, formatGallons, formatHours, formatRate, pdfFilename, pluralize } from './format';
 
 interface DetailedCostBreakdown {
 	totalFlightTime: number;
@@ -280,6 +280,7 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 	// US Letter, not jsPDF's A4 default: A4 is ~18 mm taller, so printing it
 	// on Letter paper at 100% clipped the footer and lowest rows.
 	const doc = new jsPDF({ format: 'letter' });
+	doc.setProperties({ title: pdfFilename(name).replace(/\.pdf$/, '') });
 	const pageWidth = doc.internal.pageSize.getWidth();
 	const margin = 20;
 	let y = margin;
@@ -481,8 +482,7 @@ export function generatePDF(name: string, data: EstimateData): jsPDF {
 
 export function downloadPDF(name: string, data: EstimateData): void {
 	const doc = generatePDF(name, data);
-	const filename = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_estimate.pdf`;
-	doc.save(filename);
+	doc.save(pdfFilename(name));
 }
 
 export function getPDFDataUrl(name: string, data: EstimateData): string {
